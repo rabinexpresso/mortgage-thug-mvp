@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>धितो ठग — Mortgage Thug</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #dff0f7;
+    --bg2: #c8e6f2;
+    --card: #ffffff;
+    --primary: #6b3fa0;
+    --primary-light: #b48fd8;
+    --accent: #f4a7b9;
+    --accent2: #ffd166;
+    --accent3: #06d6a0;
+    --dark: #2d2040;
+    --text: #2d2040;
+    --subtext: #7b6fa0;
+    --danger: #e63946;
+    --safe: #06d6a0;
+    --card-shadow: 0 8px 32px rgba(107,63,160,0.13);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --font-main: 'Nunito', sans-serif;
+    --font-display: 'Baloo 2', cursive;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 20% 20%, rgba(180,143,216,0.18) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(244,167,185,0.18) 0%, transparent 50%),
+                      radial-gradient(var(--bg2) 1px, transparent 1px);
+    background-size: auto, auto, 28px 28px;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 20px 40px;
+    animation: fadeIn 0.35s ease;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes popIn  { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shake  { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+  @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+
+  /* ── LOGO ── */
+  .logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .logo-icon {
+    font-size: 52px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(107,63,160,0.3));
+  }
+  .logo-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .logo-sub {
+    font-size: 13px;
+    color: var(--subtext);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .logo-nepali {
+    font-size: 13px;
+    color: var(--primary-light);
+    font-weight: 700;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    padding: 16px 24px;
+    border-radius: 50px;
+    border: none;
+    font-family: var(--font-main);
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
+    outline: none;
+    letter-spacing: 0.3px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(107,63,160,0.38), 0 3px 0 #4a2770;
+  }
+  .btn-primary:hover { background: #7d4db5; }
+  .btn-primary:disabled { background: var(--primary-light); box-shadow: none; opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2.5px solid var(--primary-light);
+  }
+  .btn-outline:hover { background: #f0e8ff; }
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(230,57,70,0.3), 0 3px 0 #b02a35;
+  }
+  .btn-accent {
+    background: var(--accent2);
+    color: var(--dark);
+    box-shadow: 0 6px 20px rgba(255,209,102,0.4), 0 3px 0 #e6a800;
+  }
+  .btn-sm {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 50px;
+    width: auto;
+  }
+
+  /* ── INPUTS ── */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 50px;
+    border: 2.5px solid var(--primary-light);
+    background: #fff;
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    transition: border 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--primary); }
+  input[type="text"]::placeholder { color: #bba8d8; }
+  .add-btn {
+    padding: 14px 20px;
+    border-radius: 50px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-family: var(--font-main);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .add-btn:active { transform: scale(0.95); }
+
+  /* ── PLAYER CHIPS ── */
+  .player-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    min-height: 40px;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #ede0ff, #dff0f7);
+    border: 1.5px solid var(--primary-light);
+    border-radius: 50px;
+    padding: 6px 14px 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    animation: popIn 0.25s ease;
+  }
+  .chip-num {
+    background: var(--primary);
+    color: #fff;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .chip-del {
+    background: none;
+    border: none;
+    color: var(--primary-light);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    margin-left: 2px;
+    transition: color 0.15s;
+  }
+  .chip-del:hover { color: var(--danger); }
+
+  /* ── HERO CARD ── */
+  .hero-card {
+    background: linear-gradient(135deg, #ffe0ec 0%, #e8d5ff 100%);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-avatar {
+    font-size: 64px;
+    animation: float 3s ease-in-out infinite;
+  }
+  .hero-badge {
+    background: var(--dark);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-family: var(--font-display);
+  }
+  .hero-desc {
+    font-size: 12px;
+    color: var(--subtext);
+    text-align: center;
+    font-weight: 600;
+  }
+  .hero-deco {
+    position: absolute;
+    opacity: 0.08;
+    font-size: 120px;
+    bottom: -20px;
+    right: -10px;
+    pointer-events: none;
+  }
+
+  /* ── TAGLINE ── */
+  .tagline {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.3;
+    max-width: 320px;
+  }
+  .tagline span { color: var(--primary); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 12px;
+    color: var(--subtext);
+    font-weight: 600;
+    margin-bottom: 14px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── ROLE REVEAL ── */
+  .reveal-outer {
+    width: 100%;
+    max-width: 340px;
+    position: relative;
+    height: 400px;
+  }
+  .reveal-back {
+    position: absolute;
+    inset: 0;
+    background: #b8d8f0;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: var(--card-shadow);
+  }
+  .reveal-back-word {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+    padding: 0 20px;
+    line-height: 1.2;
+  }
+  .reveal-back-role {
+    font-size: 12px;
+    color: var(--subtext);
+    font-weight: 700;
+    text-align: center;
+    padding: 0 20px;
+  }
+  .reveal-cover {
+    position: absolute;
+    background: var(--accent);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    box-shadow: 0 8px 32px rgba(244,167,185,0.5);
+    transition: box-shadow 0.2s;
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    top: 0; left: 0;
+    transform: rotate(-4deg);
+  }
+  .reveal-cover:active { cursor: grabbing; box-shadow: 0 16px 48px rgba(244,167,185,0.6); }
+  .reveal-icon { font-size: 28px; }
+  .reveal-hint {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    padding: 0 24px;
+    line-height: 1.4;
+  }
+  .player-name-display {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+  }
+  .pass-hint {
+    font-size: 12px;
+    color: var(--subtext);
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* ── VOTING ── */
+  .vote-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .vote-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: 50px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: all 0.18s;
+    box-shadow: 0 2px 8px rgba(107,63,160,0.07);
+  }
+  .vote-item:hover { border-color: var(--primary-light); background: #f5eeff; }
+  .vote-item.selected { border-color: var(--primary); background: #ede0ff; }
+  .vote-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .vote-name { font-weight: 800; font-size: 15px; color: var(--text); }
+  .vote-check { margin-left: auto; font-size: 22px; opacity: 0; transition: opacity 0.2s; }
+  .vote-item.selected .vote-check { opacity: 1; }
+
+  /* ── RESULT ── */
+  .result-banner {
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+  }
+  .result-emoji { font-size: 72px; display: block; margin-bottom: 12px; animation: popIn 0.4s ease 0.1s both; }
+  .result-title { font-family: var(--font-display); font-size: 30px; font-weight: 800; line-height: 1.2; }
+  .result-sub { font-size: 14px; margin-top: 8px; opacity: 0.85; font-weight: 600; }
+  .result-win { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+  .result-lose { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+  .result-info {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 2px 12px rgba(107,63,160,0.08);
+  }
+  .result-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0e8ff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .result-info-row:last-child { border-bottom: none; }
+  .result-info-label { color: var(--subtext); }
+  .result-info-val { color: var(--primary); font-weight: 800; }
+
+  /* ── GUESS INPUT ── */
+  .guess-wrap {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+  }
+  .guess-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--subtext);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .guess-row { display: flex; gap: 10px; }
+
+  /* ── DIVIDER ── */
+  .divider { width: 100%; max-width: 420px; height: 1px; background: linear-gradient(90deg, transparent, var(--primary-light), transparent); margin: 8px 0; }
+
+  /* ── SETTINGS ── */
+  .settings-icon {
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    border: 2px solid var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .settings-icon:hover { background: #f0e8ff; }
+
+  .back-btn {
+    position: fixed;
+    top: 16px; left: 16px;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    border: 2px solid var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(45,32,64,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .modal-sheet {
+    background: #fff;
+    border-radius: 28px 28px 0 0;
+    padding: 28px 24px 40px;
+    width: 100%;
+    max-width: 520px;
+    animation: slideUp 0.3s cubic-bezier(.34,1.56,.64,1);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* ── CATEGORY / WORD TILES ── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .cat-tile {
+    background: #fff;
+    border: 2.5px solid var(--primary-light);
+    border-radius: var(--radius-sm);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--subtext);
+    line-height: 1.4;
+  }
+  .cat-tile:hover, .cat-tile.selected { background: #ede0ff; border-color: var(--primary); color: var(--primary); }
+  .cat-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+
+  /* ── ROUND BADGE ── */
+  .round-badge {
+    background: linear-gradient(135deg, var(--primary), #9b5de5);
+    color: #fff;
+    border-radius: 50px;
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
+
+  /* ── ERROR ── */
+  .error-msg { color: var(--danger); font-size: 13px; font-weight: 700; text-align: center; min-height: 18px; }
+
+  /* ── ALAYA BRANDING ── */
+  .brand-strip {
+    background: linear-gradient(90deg, var(--primary), #9b5de5, var(--accent));
+    border-radius: 50px;
+    padding: 8px 20px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  /* ── INSTRUCTION STEPS ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #fff;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(107,63,160,0.07);
+  }
+  .step-num {
+    background: var(--primary);
+    color: #fff;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .step-text { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .step-text b { color: var(--primary); }
+
+  /* ── PLAYER ORDER LIST ── */
+  .order-list { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 420px; }
+  .order-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 50px;
+    padding: 10px 16px;
+    box-shadow: 0 2px 8px rgba(107,63,160,0.07);
+    font-weight: 700; font-size: 14px;
+    animation: popIn 0.3s ease both;
+  }
+  .order-num {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--primary), #9b5de5);
+    border-radius: 50%;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* ── REVEAL WORD CARD ── */
+  .word-card {
+    background: linear-gradient(135deg, #fff 0%, #f0e8ff 100%);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 2px solid var(--primary-light);
+  }
+  .word-card-label { font-size: 12px; color: var(--subtext); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .word-card-main {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .word-card-cat {
+    font-size: 11px;
+    color: var(--subtext);
+    font-weight: 600;
+    background: #f0e8ff;
+    border-radius: 50px;
+    padding: 4px 12px;
+    display: inline-block;
+  }
+
+  /* ── THUG CARD ── */
+  .thug-card {
+    background: linear-gradient(135deg, #2d2040, #3d2c5a);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(45,32,64,0.4);
+    border: 2px solid rgba(180,143,216,0.3);
+  }
+  .thug-card-emoji { font-size: 52px; margin-bottom: 12px; display: block; }
+  .thug-card-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+  .thug-card-nepali { font-size: 20px; color: var(--primary-light); font-weight: 700; margin-bottom: 10px; }
+  .thug-card-desc { font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; line-height: 1.4; }
+
+  /* ── LOADING ── */
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--primary-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── HOME SCREEN DECORATIVE BLOBS ── */
+  .blob1 {
+    position: fixed; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(180,143,216,0.25), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .blob2 {
+    position: fixed; bottom: -60px; left: -60px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(244,167,185,0.2), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* ── MISC ── */
+  .gap-4 { gap: 4px; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .gap-20 { gap: 20px; }
+  .gap-24 { gap: 24px; }
+  .w-full { width: 100%; }
+  .max-w { max-width: 420px; width: 100%; }
+  .text-center { text-align: center; }
+  .flex-col { display: flex; flex-direction: column; }
+  .flex-row { display: flex; flex-direction: row; }
+  .align-center { align-items: center; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-auto { margin-top: auto; }
+  .faded { opacity: 0.55; font-size: 12px; font-weight: 600; color: var(--subtext); }
+
+  /* Reveal animation */
+  .cover-removed { animation: flyOut 0.5s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes flyOut {
+    to { transform: translateX(120%) rotate(15deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob1"></div>
+<div class="blob2"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: HOME                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div style="height:40px"></div>
+  <div class="logo-wrap">
+    <div class="logo-icon">🕵️</div>
+    <div class="logo-title">धितो ठग</div>
+    <div class="logo-sub">Mortgage Thug</div>
+    <div class="logo-nepali">by Alaya / Home Loan Experts</div>
+  </div>
+  <div style="height:20px"></div>
+  <div class="hero-card">
+    <div class="hero-avatar">🏠</div>
+    <div class="hero-badge">THUG</div>
+    <div class="hero-desc">just blend in and try to find the secret word</div>
+    <div class="hero-deco">🏦</div>
+  </div>
+  <div style="height:20px"></div>
+  <div class="tagline">The imposter game designed for <span>Alaya &amp; Home Loan Experts</span></div>
+  <div style="height:8px"></div>
+  <p class="faded text-center">भित्र एक धितो ठग छ — There's a Mortgage Thug among us</p>
+  <div style="height:28px"></div>
+  <button class="btn btn-primary" onclick="showScreen('screen-setup')">🎮 Setup the Game</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="openHowToPlay()">📖 How to Play</button>
+  <div style="height:20px"></div>
+  <div class="brand-strip">🏠 Alaya · Home Loan Experts · धितो ठग</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: SETUP                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-home')">←</button>
+  <div style="height:56px"></div>
+  <div class="logo-wrap">
+    <div class="logo-icon" style="font-size:36px">🕵️</div>
+    <div class="logo-title" style="font-size:24px">धितो ठग</div>
+  </div>
+  <div style="height:24px"></div>
+  <div class="flex-col align-center gap-8 w-full max-w">
+    <p class="section-title text-center">Add Players</p>
+    <p class="section-sub text-center">Add in clockwise order from your group circle</p>
+  </div>
+  <div style="height:12px"></div>
+  <div class="input-row">
+    <input type="text" id="player-input" placeholder="Enter player name…" maxlength="24" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="add-btn" onclick="addPlayer()">Add ↵</button>
+  </div>
+  <div style="height:8px"></div>
+  <p class="error-msg" id="setup-error"></p>
+  <div style="height:12px"></div>
+  <div class="player-chips" id="player-chips"></div>
+  <div style="height:12px"></div>
+  <p class="faded text-center" id="player-count-hint">minimum 3 players required</p>
+  <div style="height:24px"></div>
+  <button class="btn btn-primary" id="start-btn" onclick="goToCategory()" disabled>🚀 Start the Game!</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: CATEGORY                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-category" class="screen">
+  <button class="back-btn" onclick="showScreen('screen-setup')">←</button>
+  <div style="height:56px"></div>
+  <p class="section-title text-center">Choose a Category</p>
+  <p class="section-sub text-center">Pick one or more topics — word is drawn from the combined pool</p>
+  <div style="height:16px"></div>
+  <div class="cat-grid" id="cat-grid"></div>
+  <div style="height:24px"></div>
+  <button class="btn btn-primary" id="cat-confirm-btn" onclick="confirmCategory()" disabled>✅ Confirm Selection</button>
+  <div style="height:12px"></div>
+  <p class="faded text-center" id="cat-count-hint">select at least one category</p>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="pickRandomCategory()">🎲 Random Category</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: DEALING                            -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-dealing" class="screen">
+  <div style="height:60px"></div>
+  <div class="logo-icon" style="font-size:48px; animation: float 2s ease-in-out infinite">🃏</div>
+  <div style="height:20px"></div>
+  <p class="section-title text-center">Dealing Roles…</p>
+  <p class="section-sub text-center">One among you is the धितो ठग</p>
+  <div style="height:30px"></div>
+  <div class="spinner"></div>
+  <div style="height:16px"></div>
+  <p class="faded text-center" id="dealing-round-text"></p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: ROLE REVEAL                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-reveal" class="screen">
+  <div style="height:20px"></div>
+  <div class="round-badge" id="reveal-round-badge">Round 1</div>
+  <div style="height:16px"></div>
+  <p class="player-name-display" id="reveal-player-name">Player</p>
+  <div style="height:20px"></div>
+  <div class="reveal-outer" id="reveal-outer">
+    <div class="reveal-back" id="reveal-back">
+      <!-- content set by JS -->
+    </div>
+    <div class="reveal-cover" id="reveal-cover">
+      <div class="reveal-icon">⠿</div>
+      <p class="reveal-hint">drag me around to reveal your role</p>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+  <button class="btn btn-primary" id="next-player-btn" onclick="nextPlayer()">Next player →</button>
+  <div style="height:10px"></div>
+  <p class="pass-hint">pass the phone to the next player after clicking next</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: WHO GOES FIRST                     -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-first" class="screen">
+  <div style="height:48px"></div>
+  <div class="round-badge" id="first-round-badge">Round 1</div>
+  <div style="height:32px"></div>
+  <p style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--subtext);text-align:center;letter-spacing:0.5px;">Who goes first?</p>
+  <p style="font-size:13px;color:var(--subtext);font-weight:600;text-align:center;margin-top:4px;">को पहिले जान्छ?</p>
+  <div style="height:28px"></div>
+  <div id="first-player-card" style="
+    background: linear-gradient(135deg, #ffe0ec 0%, #e8d5ff 100%);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 2.5px solid var(--primary-light);
+    animation: popIn 0.45s cubic-bezier(.34,1.56,.64,1);
+  ">
+    <div style="font-size:48px;margin-bottom:16px;">🏠</div>
+    <div id="first-player-name" style="
+      font-family:var(--font-display);
+      font-size:40px;
+      font-weight:900;
+      color:var(--primary);
+      line-height:1.1;
+      word-break:break-word;
+    ">—</div>
+    <div style="margin-top:14px;font-size:15px;font-weight:700;color:var(--dark);">goes first!</div>
+    <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--subtext);">then continue clockwise 🔄</div>
+  </div>
+  <div style="height:36px"></div>
+  <button class="btn btn-primary" onclick="showGameScreen()">🗣️ Start Discussion →</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: GAME (DISCUSSION)                  -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div style="height:20px"></div>
+  <div class="round-badge" id="game-round-badge">Round 1</div>
+  <div style="height:16px"></div>
+  <div class="logo-icon" style="font-size:36px">🗣️</div>
+  <div style="height:12px"></div>
+  <p class="section-title text-center">Discussion Time!</p>
+  <p class="section-sub text-center">Go around the circle — give ONE vague clue word each</p>
+  <div style="height:16px"></div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Each player gives <b>one vague word clue</b> about the secret word (players know it; ठग is guessing)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Go <b>clockwise</b> around the circle. Don't make it obvious but don't be too vague either.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">After all clues, <b>discuss & vote</b> for who you think is the धितो ठग</div>
+    </div>
+  </div>
+  <div style="height:20px"></div>
+  <p class="section-sub text-center" id="game-order-label">Player order (clockwise)</p>
+  <div style="height:8px"></div>
+  <div class="order-list" id="game-order-list"></div>
+  <div style="height:28px"></div>
+  <button class="btn btn-primary" onclick="showScreen('screen-vote')">🗳️ Vote for the Thug!</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: VOTE                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-vote" class="screen">
+  <div style="height:20px"></div>
+  <div class="round-badge" id="vote-round-badge">Round 1</div>
+  <div style="height:16px"></div>
+  <p class="section-title text-center">Who is the धितो ठग?</p>
+  <p class="section-sub text-center">Vote for who you think is the Mortgage Thug</p>
+  <div style="height:16px"></div>
+  <div class="vote-list" id="vote-list"></div>
+  <div style="height:8px"></div>
+  <p class="error-msg" id="vote-error"></p>
+  <div style="height:16px"></div>
+  <button class="btn btn-primary" onclick="submitVote()">✅ Confirm Vote</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: THUG GUESS                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-thug-guess" class="screen">
+  <div style="height:40px"></div>
+  <div class="thug-card">
+    <span class="thug-card-emoji">🕵️</span>
+    <div class="thug-card-title">You've been caught!</div>
+    <div class="thug-card-nepali">तपाई पक्राउ पर्नुभयो!</div>
+    <div class="thug-card-desc">But you have ONE CHANCE — guess the secret word to still win!</div>
+  </div>
+  <div style="height:24px"></div>
+  <p class="section-sub text-center">The secret word is from: <b id="guess-category-name" style="color:var(--primary)"></b></p>
+  <div style="height:12px"></div>
+  <div class="guess-wrap">
+    <div class="guess-label">🤔 धितो ठग — what was the secret word?</div>
+    <div class="guess-row">
+      <input type="text" id="thug-guess-input" placeholder="Your guess…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="add-btn" onclick="submitThugGuess()">🎯</button>
+    </div>
+    <div style="height:8px"></div>
+    <p class="error-msg" id="guess-error"></p>
+  </div>
+  <div style="height:20px"></div>
+  <p class="faded text-center">Hint: it's an Australian mortgage term 😉</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN: RESULT                             -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="screen-result" class="screen">
+  <div style="height:30px"></div>
+  <div class="result-banner" id="result-banner">
+    <span class="result-emoji" id="result-emoji">🎉</span>
+    <div class="result-title" id="result-title">Thug is Caught!</div>
+    <div class="result-sub" id="result-sub">The team wins this round</div>
+  </div>
+  <div style="height:16px"></div>
+  <div class="result-info" id="result-info">
+    <div class="result-info-row">
+      <span class="result-info-label">Secret Word</span>
+      <span class="result-info-val" id="result-word">—</span>
+    </div>
+    <div class="result-info-row">
+      <span class="result-info-label">धितो ठग was</span>
+      <span class="result-info-val" id="result-thug">—</span>
+    </div>
+    <div class="result-info-row">
+      <span class="result-info-label">Category</span>
+      <span class="result-info-val" id="result-cat">—</span>
+    </div>
+    <div class="result-info-row">
+      <span class="result-info-label">Voted for</span>
+      <span class="result-info-val" id="result-voted">—</span>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+  <button class="btn btn-primary" onclick="playAgain()">🔄 Play Again (same players)</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="showScreen('screen-home')">🏠 Back to Home</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL: HOW TO PLAY                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-howtoplay" onclick="closeModal('modal-howtoplay')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-title">📖 How to Play<br><span style="font-size:14px;font-weight:600;color:var(--subtext)">कसरी खेल्ने?</span></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">Add all players in <b>clockwise order</b>. Minimum 3 players required.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Choose one of <b>6 mortgage categories</b>. A secret word is randomly picked from it.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><b>Pass the phone</b> to each player. Drag the pink card to see your role. One player will be the <b>धितो ठग</b> (Mortgage Thug) — they don't see the word.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">Go around the circle. Each player says <b>one vague word clue</b> about the secret word. The ठग tries to guess it from the clues.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text"><b>Discuss & vote</b> for who you think is the ठग. Majority vote decides.</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-text">If caught, the ठग gets <b>one chance to guess</b> the secret word. Guess correctly = ठग wins!</div></div>
+      <div class="step"><div class="step-num">7</div><div class="step-text">If the ठग is <b>NOT caught</b>, the ठग wins. Otherwise, the team wins!</div></div>
+    </div>
+    <div style="height:20px"></div>
+    <button class="btn btn-primary" onclick="closeModal('modal-howtoplay')">Got it! 👍</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// GAME DATA
+// ══════════════════════════════════════════
+const CATEGORIES = [
+  // ── CATEGORY 1: LENDERS ON CONNECTIVE PANEL ──────────────────────────────
+  // Words = lender brand names only. Short, punchy, instantly recognisable.
+  // No product names, no acronyms, no overlap with other categories.
+  {
+    id: 'lenders',
+    name: 'Connective Lenders',
+    nepali: 'ऋणदाता',
+    icon: '🏦',
+    words: [
+      'ANZ',
+      'CBA',
+      'Westpac',
+      'NAB',
+      'Macquarie',
+      'ING',
+      'Suncorp',
+      'Bankwest',
+      'St.George',
+      'Bendigo',
+      'AMP',
+      'Pepper',
+      'Liberty',
+      'La Trobe',
+      'Firstmac',
+      'Resimac',
+      'RAMS',
+      'Bluestone',
+      'Brighten',
+      'Thinktank',
+      'MyState',
+      'Newcastle',
+      'Qudos',
+      'Heritage',
+      'Teachers',
+      'OwnHome',
+      'MA Money',
+      'ME Bank',
+      'Australian Military Bank',
+      'Auswide',
+      'Bank of China',
+      'Bank of Melbourne',
+      'Bank of South Australia',
+      'Better Choice',
+      'Better Mortgage Management',
+      'Granite',
+      'Gateway',
+      "People's Choice",
+      'Redzed',
+      'Ubank',
+      'UniBank'
+    ]
+  },
+
+  // ── CATEGORY 2: CLIENT DOCUMENTS ─────────────────────────────────────────
+  // Documents a client provides to the broker during fact-find & assessment.
+  // No lender-issued docs, no process steps, no broker/compliance terms.
+  {
+    id: 'client-docs',
+    name: 'Client Documents',
+    nepali: 'ग्राहक कागजात',
+    icon: '📄',
+    words: [
+      'Payslips',
+      'Passport',
+      'Rates Notice',
+      'BAS',
+      'Tax Returns',
+      'Lease',
+      'Superannuation',
+      'Centrelink',
+      'Dividend',
+      'Medicare',
+      'Birth Certificate',
+      'Rental Ledger',
+      'NOA',
+      'Bank Statements',
+      'Trust Deed',
+      'Drivers Licence',
+      'Employment Contract',
+      'Accountant Letter',
+      'Company Returns',
+      'Body Corporate',
+      'Savings',
+      'Divorce Settlement',
+      'Stat Dec',
+      'Visa',
+      'Income Statement',
+      'Contract of Sale',
+      'Rent-Free Letter',
+      'Certificate of Title',
+      'Living Expenses Bank Statement',
+      'Salary Credits Bank Statement',
+      'Equifax Report',
+      'Novated Lease Statement',
+      'Gift Letter'
+    ]
+  },
+
+  // ── CATEGORY 3: CREDIT ASSESSMENT ────────────────────────────────────────
+  // Terms used when analysing whether a client can afford & qualify for a loan.
+  // No lender names, no process milestones, no documents.
+  {
+    id: 'assessment',
+    name: 'Credit Assessment',
+    nepali: 'क्रेडिट मूल्यांकन',
+    icon: '🔢',
+    words: [
+      'LVR',
+      'LMI',
+      'HEM',
+      'Buffer',
+      'Serviceability',
+      'Shading',
+      'Addbacks',
+      'Genuine Savings',
+      'Negative Gearing',
+      'Depreciation',
+      'Living Expenses',
+      'HECS',
+      'Credit Score',
+      'Default',
+      'Liability',
+      'DTI',
+      'PAYG',
+      'Rental Income',
+      'Boarder Income',
+      'Cashout',
+      'LMI Waiver',
+      'Low Doc',
+      'Full Doc',
+      'Non-Resident',
+      'Guarantor',
+      'Interest Only',
+      'Bridging',
+      'Sole Trader',
+      'Partnership',
+      'Company',
+      'Expat',
+      'Cross-Collateralisation',
+      'Bad Credit',
+      'Common Debt Reducer',
+      'Fixed Rate',
+      'Arrears',
+      'Late Repayment',
+      'Credit Enquiries',
+      'Bankruptcy',
+      'Part 9 Debt',
+      'Court Judgement',
+      'Tax Debt',
+      'Financial Hardship',
+      'Scenario'
+    ]
+  },
+
+  // ── CATEGORY 4: LOAN JOURNEY (start to settlement) ───────────────────────
+  {
+    id: 'loan-journey',
+    name: 'Loan Journey',
+    nepali: 'ऋण यात्रा',
+    icon: '🔄',
+    words: [
+      'Lead',
+      'Web Lead',
+      'Cold Call',
+      'Enquiry',
+      'Discovery Call',
+      'Fact Find',
+      'Comparison',
+      'Recommendation',
+      'Application',
+      'Assessment',
+      'Verification',
+      'Submission',
+      'Valuation',
+      'Conditional',
+      'MIR',
+      'Pre-Approval',
+      'Formal Approval',
+      'Solicitor',
+      'PEXA',
+      'Finance Date',
+      'Cooling Off',
+      'Building Inspection',
+      'Pest Inspection',
+      'Settlement',
+      'Discharge',
+      'Clawback',
+      'Upfront',
+      'Trail',
+      'Referral',
+      'BDM',
+      'Accreditation',
+      'Rate Lock',
+      'Privacy Form',
+      'NextGen ID',
+      'Digital ID',
+      'IDYou',
+      'Certification of ID',
+      'Embassy'
+    ]
+  },
+
+  // ── CATEGORY 5: CUSTOMER CARE ────────────────────────────────────────────
+  {
+    id: 'post-settlement',
+    name: 'Customer Care',
+    nepali: 'ग्राहक सेवा',
+    icon: '🧭',
+    words: [
+      'Rate Review',
+      'Annual Review',
+      'Refinance',
+      'Cashback',
+      'Top Up',
+      'Retention',
+      'Offset',
+      'Redraw',
+      'Second Property',
+      'Upgrade',
+      'Downsize',
+      'Renovation',
+      'Cross Sell',
+      'Referral Partner',
+      'Testimonial',
+      'Google Review',
+      'Birthday Call',
+      'Property Alert',
+      'Equity Release',
+      'Loyalty',
+      'Pricing',
+      'Cash Rate',
+      'Follow Up',
+      'Rapport',
+      'Relationship',
+      'Communication',
+      'Responsiveness',
+      'Trust',
+      'Care',
+      'Passion',
+      'Oneness',
+      'Accountability',
+      'Transparency',
+      'Satisfaction'
+    ]
+  },
+
+  // ── CATEGORY 6: GOVERNMENT SCHEMES & PROPERTY ────────────────────────────
+  {
+    id: 'schemes',
+    name: 'Schemes & Property',
+    nepali: 'सरकारी योजना',
+    icon: '🏛️',
+    words: [
+      'Help to Buy',
+      'Stamp Duty',
+      'Land Tax',
+      'Shared Equity',
+      'Auction',
+      'Off the Plan',
+      'New Build',
+      'Vacant Land',
+      'Strata',
+      'Torrens Title',
+      'Company Title',
+      'Leasehold',
+      'Granny Flat',
+      'Subdivision',
+      'Rural',
+      'Commercial',
+      'Rental Yield',
+      'Capital Gains',
+      'Net Income',
+      'Family Home Guarantee Scheme',
+      'First Home Guarantee Scheme',
+      'First Home Owner Grant',
+      'Defence Home Ownership Assistance Scheme (DHOAS)',
+      'Property Share',
+      'Tenants-in-Common',
+      'Joint Tenants',
+      '2 on loan 1 on title',
+      'Private Treaty Sale',
+      'Duplex',
+      'Positive Gearing',
+      'Property Price',
+      'Simultaneous Settlement'
+    ]
+  },
+
+  // ── CATEGORY 7: BHOK LAGYO GROUP ─────────────────────────────────────────
+  {
+    id: 'bhok-lagyo',
+    name: 'Bhok Lagyo Group',
+    nepali: 'भोक लाग्यो',
+    icon: '🍜',
+    words: [
+      'Rabin',
+      'Babin',
+      'Jeshan',
+      'Binay',
+      'Sajal',
+      'Safal',
+      'Pramesh',
+      'Aman',
+      'Sameer',
+      'Prajwal'
+    ]
+  }
+];
+
+// ── STATE ──
+let state = {
+  players: [],
+  selectedCategories: [],
+  selectedCategory: null,
+  selectedWord: null,
+  thugIndex: null,
+  currentRevealIndex: 0,
+  firstPlayerIndex: 0,
+  round: 1,
+  voteTarget: null,
+  revealed: false,
+};
+
+// ── SCREEN NAV ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openHowToPlay() {
+  document.getElementById('modal-howtoplay').classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── SETUP SCREEN ──
+function addPlayer() {
+  const input = document.getElementById('player-input');
+  const name = input.value.trim();
+  const err = document.getElementById('setup-error');
+
+  if (!name) { err.textContent = 'Please enter a name'; shake(input); return; }
+  if (state.players.map(p => p.toLowerCase()).includes(name.toLowerCase())) {
+    err.textContent = 'This name is already added!'; shake(input); return;
+  }
+
+  state.players.push(name);
+  input.value = '';
+  err.textContent = '';
+  renderChips();
+  updateStartBtn();
+  input.focus();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('player-input');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+  const gi = document.getElementById('thug-guess-input');
+  if (gi) gi.addEventListener('keydown', e => { if (e.key === 'Enter') submitThugGuess(); });
+  renderCategoryGrid();
+});
+
+function removePlayer(idx) {
+  state.players.splice(idx, 1);
+  renderChips();
+  updateStartBtn();
+}
+
+function renderChips() {
+  const el = document.getElementById('player-chips');
+  el.innerHTML = state.players.map((p, i) => `
+    <div class="chip">
+      <span class="chip-num">${i+1}</span>
+      ${escHtml(p)}
+      <button class="chip-del" onclick="removePlayer(${i})">×</button>
+    </div>
+  `).join('');
+  const hint = document.getElementById('player-count-hint');
+  const n = state.players.length;
+  hint.textContent = n === 0 ? 'minimum 3 players required' :
+    n < 3 ? `${n} added — need ${3-n} more` :
+    `${n} players ready ✓`;
+}
+
+function updateStartBtn() {
+  document.getElementById('start-btn').disabled = state.players.length < 3;
+}
+
+function shake(el) {
+  el.style.animation = 'shake 0.4s ease';
+  el.addEventListener('animationend', () => el.style.animation = '', { once: true });
+}
+
+// ── CATEGORY SCREEN ──
+function renderCategoryGrid() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATEGORIES.map((c, i) => `
+    <div class="cat-tile" data-idx="${i}" onclick="selectCategory(${i})">
+      <span class="cat-icon">${c.icon}</span>
+      ${c.name}<br>
+      <span style="color:var(--primary-light);font-size:11px">${c.nepali}</span>
+      <span class="cat-check" id="cat-check-${i}" style="display:none;margin-top:4px;font-size:16px;">✅</span>
+    </div>
+  `).join('');
+}
+
+function selectCategory(idx) {
+  const i = state.selectedCategories.indexOf(idx);
+  if (i === -1) {
+    state.selectedCategories.push(idx);
+  } else {
+    state.selectedCategories.splice(i, 1);
+  }
+  // Update tile visuals
+  document.querySelectorAll('.cat-tile').forEach((t, ti) => {
+    const selected = state.selectedCategories.includes(ti);
+    t.classList.toggle('selected', selected);
+    document.getElementById(`cat-check-${ti}`).style.display = selected ? 'block' : 'none';
+  });
+  const n = state.selectedCategories.length;
+  const btn = document.getElementById('cat-confirm-btn');
+  btn.disabled = n === 0;
+  const hint = document.getElementById('cat-count-hint');
+  if (n === 0) hint.textContent = 'select at least one category';
+  else if (n === 1) hint.textContent = `1 category selected`;
+  else hint.textContent = `${n} categories selected — words combined!`;
+}
+
+function pickRandomCategory() {
+  // Clear all, pick one random
+  state.selectedCategories = [];
+  document.querySelectorAll('.cat-tile').forEach((t, i) => {
+    t.classList.remove('selected');
+    document.getElementById(`cat-check-${i}`).style.display = 'none';
+  });
+  const idx = Math.floor(Math.random() * CATEGORIES.length);
+  selectCategory(idx);
+}
+
+function goToCategory() {
+  state.selectedCategories = [];
+  document.querySelectorAll('.cat-tile').forEach((t, i) => {
+    t.classList.remove('selected');
+    const chk = document.getElementById(`cat-check-${i}`);
+    if (chk) chk.style.display = 'none';
+  });
+  document.getElementById('cat-confirm-btn').disabled = true;
+  document.getElementById('cat-count-hint').textContent = 'select at least one category';
+  showScreen('screen-category');
+}
+
+function confirmCategory() {
+  if (state.selectedCategories.length === 0) return;
+  // Merge word pools from all selected categories
+  const combinedWords = state.selectedCategories.flatMap(idx => CATEGORIES[idx].words);
+  state.selectedWord = combinedWords[Math.floor(Math.random() * combinedWords.length)];
+  // Store which category the chosen word belongs to (for display)
+  state.selectedCategory = state.selectedCategories.find(idx =>
+    CATEGORIES[idx].words.includes(state.selectedWord)
+  ) ?? state.selectedCategories[0];
+  state.thugIndex = Math.floor(Math.random() * state.players.length);
+  state.currentRevealIndex = 0;
+  state.round = 1;
+  state.voteTarget = null;
+
+  // Dealing animation
+  showScreen('screen-dealing');
+  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players`;
+  setTimeout(() => {
+    startReveal();
+  }, 1800);
+}
+
+// ── REVEAL SCREEN ──
+function startReveal() {
+  state.currentRevealIndex = 0;
+  showRevealFor(0);
+}
+
+function showRevealFor(idx) {
+  const player = state.players[idx];
+  const isThug = idx === state.thugIndex;
+  const cat = CATEGORIES[state.selectedCategory];
+
+  document.getElementById('reveal-player-name').textContent = player;
+  document.getElementById('reveal-round-badge').textContent = `Round ${state.round}`;
+
+  // Set back content
+  const back = document.getElementById('reveal-back');
+  if (isThug) {
+    back.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:52px;margin-bottom:12px">🕵️</div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--primary)">धितो ठग</div>
+        <div style="font-size:20px;font-weight:800;color:var(--dark);margin-top:4px">MORTGAGE THUG</div>
+        <div style="font-size:12px;color:var(--subtext);margin-top:12px;font-weight:600">Blend in. Listen for clues.<br>Figure out the secret word.</div>
+      </div>
+    `;
+  } else {
+    back.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:52px;margin-bottom:12px">🏠</div>
+        <div style="font-size:12px;color:var(--subtext);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Secret Word</div>
+        <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--primary);line-height:1.2;padding:0 10px">${escHtml(state.selectedWord)}</div>
+        <div style="margin-top:10px">
+          <span style="font-size:11px;color:var(--subtext);background:#f0e8ff;border-radius:50px;padding:4px 12px;font-weight:600">${escHtml(cat.name)}</span>
+        </div>
+        <div style="font-size:12px;color:var(--subtext);margin-top:12px;font-weight:600">Give a vague one-word clue.<br>Don't make it obvious!</div>
+      </div>
+    `;
+  }
+
+  // Reset cover
+  const cover = document.getElementById('reveal-cover');
+  cover.style.transform = 'rotate(-4deg)';
+  cover.style.transition = 'none';
+  cover.style.opacity = '1';
+  cover.classList.remove('cover-removed');
+  cover.style.left = '0';
+  cover.style.top = '0';
+  cover.style.pointerEvents = 'auto';
+
+  // Set next button label
+  const isLast = idx === state.players.length - 1;
+  const btn = document.getElementById('next-player-btn');
+  btn.textContent = isLast ? '🎮 Start Game Discussion →' : `Next player →`;
+
+  showScreen('screen-reveal');
+  initDrag();
+}
+
+function nextPlayer() {
+  const idx = state.currentRevealIndex;
+  if (idx === state.players.length - 1) {
+    // All revealed — show who goes first
+    showFirstScreen();
+  } else {
+    state.currentRevealIndex++;
+    // Brief blank interstitial
+    showScreen('screen-dealing');
+    document.getElementById('dealing-round-text').textContent = `Player ${state.currentRevealIndex + 1} of ${state.players.length}`;
+    setTimeout(() => showRevealFor(state.currentRevealIndex), 900);
+  }
+}
+
+// ── DRAG TO REVEAL ──
+function initDrag() {
+  const cover = document.getElementById('reveal-cover');
+  const outer = document.getElementById('reveal-outer');
+  let startX, startY, startLeft, startTop, dragging = false;
+  let removed = false;
+
+  function onStart(x, y) {
+    if (removed) return;
+    dragging = true;
+    startX = x; startY = y;
+    const rect = cover.getBoundingClientRect();
+    const outerRect = outer.getBoundingClientRect();
+    startLeft = rect.left - outerRect.left;
+    startTop = rect.top - outerRect.top;
+    cover.style.transition = 'none';
+  }
+
+  function onMove(x, y) {
+    if (!dragging || removed) return;
+    const dx = x - startX;
+    const dy = y - startY;
+    const newLeft = startLeft + dx;
+    const newTop = startTop + dy;
+    cover.style.left = newLeft + 'px';
+    cover.style.top = newTop + 'px';
+
+    // If moved far enough, dismiss
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist > 120) {
+      removed = true;
+      dragging = false;
+      cover.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+      cover.style.transform = `translate(${dx*2}px, ${dy*2}px) rotate(20deg)`;
+      cover.style.opacity = '0';
+      cover.style.pointerEvents = 'none';
+    }
+  }
+
+  function onEnd() { dragging = false; }
+
+  // Touch
+  cover.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    onStart(t.clientX, t.clientY);
+  }, { passive: true });
+  cover.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    onMove(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  cover.addEventListener('touchend', onEnd);
+
+  // Mouse
+  cover.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
+  document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+  document.addEventListener('mouseup', onEnd);
+}
+
+// ── WHO GOES FIRST SCREEN ──
+function showFirstScreen() {
+  // Pick a random player from everyone including the thug
+  const firstIdx = Math.floor(Math.random() * state.players.length);
+  state.firstPlayerIndex = firstIdx;
+
+  document.getElementById('first-round-badge').textContent = `Round ${state.round}`;
+  document.getElementById('first-player-name').textContent = state.players[firstIdx];
+  showScreen('screen-first');
+}
+
+// ── GAME SCREEN ──
+function showGameScreen() {
+  document.getElementById('game-round-badge').textContent = `Round ${state.round}`;
+  const list = document.getElementById('game-order-list');
+
+  // Reorder players starting from firstPlayerIndex (clockwise)
+  const n = state.players.length;
+  const start = (state.firstPlayerIndex !== undefined) ? state.firstPlayerIndex : 0;
+  const ordered = Array.from({length: n}, (_, i) => (start + i) % n);
+
+  list.innerHTML = ordered.map((playerIdx, pos) => `
+    <div class="order-item" style="animation-delay:${pos*0.05}s">
+      <div class="order-num">${pos+1}</div>
+      <span>${escHtml(state.players[playerIdx])}</span>
+      ${pos === 0 ? '<span style="margin-left:auto;font-size:11px;background:var(--accent2);color:var(--dark);border-radius:50px;padding:2px 10px;font-weight:800;">first</span>' : ''}
+    </div>
+  `).join('');
+  showScreen('screen-game');
+}
+
+// ── VOTE SCREEN ──
+function showVoteScreen() {
+  document.getElementById('vote-round-badge').textContent = `Round ${state.round}`;
+  state.voteTarget = null;
+  const list = document.getElementById('vote-list');
+  list.innerHTML = state.players.map((p, i) => `
+    <div class="vote-item" id="vote-${i}" onclick="selectVote(${i})">
+      <div class="vote-avatar">${getInitials(p)}</div>
+      <div>
+        <div class="vote-name">${escHtml(p)}</div>
+      </div>
+      <span class="vote-check">✅</span>
+    </div>
+  `).join('');
+  document.getElementById('vote-error').textContent = '';
+  showScreen('screen-vote');
+}
+
+// Override button in game screen
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('#screen-game .btn-primary');
+  if (btn) btn.onclick = () => showVoteScreen();
+});
+
+function selectVote(idx) {
+  state.voteTarget = idx;
+  document.querySelectorAll('.vote-item').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('vote-error').textContent = '';
+}
+
+function submitVote() {
+  if (state.voteTarget === null) {
+    document.getElementById('vote-error').textContent = 'Please select someone to vote for!';
+    return;
+  }
+  const votedIdx = state.voteTarget;
+  const isThugCaught = votedIdx === state.thugIndex;
+
+  if (isThugCaught) {
+    // Thug gets a chance to guess
+    document.getElementById('guess-category-name').textContent = CATEGORIES[state.selectedCategory].name;
+    document.getElementById('thug-guess-input').value = '';
+    document.getElementById('guess-error').textContent = '';
+    showScreen('screen-thug-guess');
+  } else {
+    // Thug escapes
+    showResult(false, false, votedIdx);
+  }
+}
+
+function submitThugGuess() {
+  const guess = document.getElementById('thug-guess-input').value.trim();
+  if (!guess) {
+    document.getElementById('guess-error').textContent = 'Enter your guess!';
+    return;
+  }
+  const correct = guess.toLowerCase() === state.selectedWord.toLowerCase();
+  showResult(true, correct, state.voteTarget);
+}
+
+// ── RESULT SCREEN ──
+function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
+  const cat = CATEGORIES[state.selectedCategory];
+  const thugName = state.players[state.thugIndex];
+  const votedName = state.players[votedIdx];
+
+  let emoji, title, sub, bannerClass;
+
+  if (!thugCaught) {
+    // Thug wins - not caught
+    emoji = '🎭'; title = 'धितो ठग Escapes!'; sub = `${escHtml(thugName)} was the Mortgage Thug and was NOT caught!`;
+    bannerClass = 'result-win';
+  } else if (thugCaught && thugGuessedCorrect) {
+    // Thug caught but guessed correctly
+    emoji = '🕵️'; title = 'ठग Won by Guessing!'; sub = `Caught but guessed the word correctly — ${escHtml(thugName)} wins!`;
+    bannerClass = 'result-win';
+  } else {
+    // Team wins
+    emoji = '🎉'; title = 'Team Wins!'; sub = `${escHtml(thugName)} was the Mortgage Thug and got caught!`;
+    bannerClass = 'result-lose';
+  }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-banner').className = `result-banner ${bannerClass}`;
+  document.getElementById('result-word').textContent = state.selectedWord;
+  document.getElementById('result-thug').textContent = thugName;
+  document.getElementById('result-cat').textContent = cat.name;
+  document.getElementById('result-voted').textContent = votedName;
+
+  showScreen('screen-result');
+}
+
+// ── PLAY AGAIN ──
+function playAgain() {
+  // Keep same players, go to category
+  state.selectedCategories = [];
+  state.selectedCategory = null;
+  state.selectedWord = null;
+  state.thugIndex = null;
+  state.currentRevealIndex = 0;
+  state.firstPlayerIndex = 0;
+  state.round++;
+  state.voteTarget = null;
+  document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('selected'));
+  document.getElementById('cat-confirm-btn').disabled = true;
+  showScreen('screen-category');
+}
+
+// ── SCREEN OVERRIDE: vote btn in game screen ──
+// (we override it when showVoteScreen is defined above)
+document.addEventListener('DOMContentLoaded', () => {
+  const voteBtn = document.querySelector('#screen-game button.btn-primary');
+  if (voteBtn) voteBtn.addEventListener('click', () => showVoteScreen());
+});
+
+// ── UTILS ──
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+</script>
+</body>
+</html>
