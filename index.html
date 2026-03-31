@@ -795,7 +795,7 @@
   <div style="height:24px"></div>
   <div class="flex-col align-center gap-8 w-full max-w">
     <p class="section-title text-center">Add Players</p>
-    <p class="section-sub text-center">Add in clockwise order from your group circle</p>
+    <p class="section-sub text-center">Add in clockwise order — drag ☰ to reorder</p>
   </div>
   <div style="height:12px"></div>
   <div class="input-row">
@@ -805,7 +805,7 @@
   <div style="height:8px"></div>
   <p class="error-msg" id="setup-error"></p>
   <div style="height:12px"></div>
-  <div class="player-chips" id="player-chips"></div>
+  <div id="player-list" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:420px;"></div>
   <div style="height:12px"></div>
   <p class="faded text-center" id="player-count-hint">minimum 3 players required</p>
   <div style="height:24px"></div>
@@ -828,6 +828,8 @@
   <p class="faded text-center" id="cat-count-hint">select at least one category</p>
   <div style="height:12px"></div>
   <button class="btn btn-outline" onclick="pickRandomCategory()">🎲 Random Category</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" id="select-all-btn" onclick="toggleSelectAll()">☑️ Select All Categories</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -865,6 +867,8 @@
   </div>
   <div style="height:24px"></div>
   <button class="btn btn-primary" id="next-player-btn" onclick="nextPlayer()">Next player →</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" id="reset-word-btn" onclick="resetWord()" style="display:none;">🔄 Reset Word</button>
   <div style="height:10px"></div>
   <p class="pass-hint">pass the phone to the next player after clicking next</p>
 </div>
@@ -1350,6 +1354,279 @@ const CATEGORIES = [
       'Sameer',
       'Prajwal'
     ]
+  },
+
+  // ── CATEGORY 8: PHILOSOPHY TERMS ─────────────────────────────────────────
+  {
+    id: 'philosophy',
+    name: 'Philosophy',
+    nepali: 'दर्शनशास्त्र',
+    icon: '🧠',
+    words: [
+      'Virtue',
+      'Wisdom',
+      'Logos',
+      'Eudaimonia',
+      'Forms',
+      'Karma',
+      'Dharma',
+      'Moksha',
+      'Dao',
+      'Balance',
+      'Faith',
+      'Divinity',
+      'Soul',
+      'Salvation',
+      'Natural Law',
+      'Reason',
+      'Experience',
+      'Doubt',
+      'Freedom',
+      'Rights',
+      'Existence',
+      'Choice',
+      'Absurdity',
+      'Nihilism',
+      'Perspective',
+      'Power',
+      'Language',
+      'Interpretation',
+      'Relativism',
+      'Identity'
+    ]
+  },
+
+  // ── CATEGORY 9: NEPAL/AUSTRALIA CULTURAL CORNER ──────────────────────────
+  {
+    id: 'cultural',
+    name: 'Nepal/Australia Cultural Corner',
+    nepali: 'सांस्कृतिक कुना',
+    icon: '🦘',
+    words: [
+      'Kangaroo',
+      'Dhaka',
+      'Topi',
+      'Kathmandu',
+      'Sydney',
+      'Everest',
+      'Uluru',
+      'Himalayan',
+      'Harbour',
+      'Mascot',
+      'Daura-Suruwal',
+      'Momos',
+      'Dal-Bhat',
+      'Namaste',
+      'Cricket',
+      'Khukuri',
+      'Koala',
+      'Yak',
+      'Barbecue',
+      'Chiya',
+      'Rhino',
+      'Pokhara',
+      'Patan',
+      'Bondi',
+      'Sherpa',
+      'Boomerang',
+      'Dashain',
+      'Rhododendron',
+      'Monsoon',
+      'Didgeridoo'
+    ]
+  },
+
+  // ── CATEGORY 10: FAMOUS PEOPLE ────────────────────────────────────────────
+  {
+    id: 'famous-people',
+    name: 'Famous People',
+    nepali: 'प्रसिद्ध व्यक्तिहरू',
+    icon: '🌟',
+    words: [
+      'Albert Einstein',
+      'Isaac Newton',
+      'Leonardo da Vinci',
+      'William Shakespeare',
+      'Socrates',
+      'Plato',
+      'Aristotle',
+      'Gautama Buddha',
+      'Confucius',
+      'Laozi',
+      'Napoleon Bonaparte',
+      'Julius Caesar',
+      'Alexander the Great',
+      'Mahatma Gandhi',
+      'Nelson Mandela',
+      'Martin Luther King Jr.',
+      'Abraham Lincoln',
+      'Winston Churchill',
+      'Steve Jobs',
+      'Elon Musk',
+      'Bill Gates',
+      'Mark Zuckerberg',
+      'Michael Jordan',
+      'Cristiano Ronaldo',
+      'Lionel Messi',
+      'Taylor Swift',
+      'Beyoncé',
+      'Leonardo DiCaprio',
+      'Oprah Winfrey',
+      'Barack Obama'
+    ]
+  },
+
+  // ── CATEGORY 11: HOME LOAN EXPERTS BROKERS ───────────────────────────────
+  {
+    id: 'hle-brokers',
+    name: 'Home Loan Experts Brokers',
+    nepali: 'गृह ऋण विशेषज्ञ',
+    icon: '🏢',
+    words: [
+      'Otto Dargan',
+      'Kameron Gutierrez',
+      'Amine Berrada',
+      'Jonathan Preston',
+      'Robert Mo',
+      'Vivienne Than',
+      'Mohit Lal Pradhan',
+      'Sheng Ye',
+      'Romy Dhungana',
+      'Prakash Rai',
+      'Jenish Manandhar',
+      'Kenneth Cheah',
+      'Manish Rana',
+      'Nirayu Shakya',
+      'Ujjwal Maharjan',
+      'Preeti Kowshik',
+      'Pramesh Vaidya',
+      'Ajar Rajbhandari',
+      'Rojina Shivabhakti',
+      'Rojan Paudel',
+      'Sid (Siddhartha) Bajracharya',
+      'Anil Joshi',
+      'Aseem Sangachhe',
+      'Sunish Vaidya',
+      'Prabesh Thapa',
+      'Samir Maharjan',
+      'Kritesh Neupane'
+    ]
+  },
+
+  // ── CATEGORY 12: SUPERHEROES ──────────────────────────────────────────────
+  {
+    id: 'superheroes',
+    name: 'Superheroes',
+    nepali: 'सुपरहिरो',
+    icon: '🦸',
+    words: [
+      'Superman',
+      'Batman',
+      'Spiderman',
+      'Ironman',
+      'Hulk',
+      'Thor',
+      'Flash',
+      'Aquaman',
+      'Wolverine',
+      'Deadpool',
+      'Black Panther',
+      'Captain America',
+      'Wonder Woman',
+      'Storm',
+      'Professor X',
+      'Gambit',
+      'Ant-Man',
+      'Silver Surfer',
+      'Daredevil',
+      'Green Lantern',
+      'Supergirl',
+      'Batgirl',
+      'Robin',
+      'Goku',
+      'Naruto',
+      'Doctor Strange',
+      'Black Widow'
+    ]
+  },
+
+  // ── CATEGORY 13: NEPALI FOODS ─────────────────────────────────────────────
+  {
+    id: 'nepali-foods',
+    name: 'Nepali Foods',
+    nepali: 'नेपाली खाना',
+    icon: '🍛',
+    words: [
+      'Dal',
+      'Bhat',
+      'Tarkari',
+      'Achar',
+      'Chiura',
+      'Roti',
+      'Momo',
+      'Chowmein',
+      'Thukpa',
+      'Selroti',
+      'Chatpate',
+      'Panipuri',
+      'Pakoda',
+      'Samosa',
+      'Anda',
+      'Bhuteko Bhat',
+      'Gundruk',
+      'Dhido',
+      'Chana',
+      'Chiya',
+      'Lassi',
+      'Dahi',
+      'Kheer',
+      'Halwa',
+      'Sekuwa',
+      'Choila',
+      'Sukuti',
+      'Bara',
+      'Chatamari'
+    ]
+  },
+
+  // ── CATEGORY 14: ROMANTIC ─────────────────────────────────────────────────
+  {
+    id: 'romantic',
+    name: 'Romantic',
+    nepali: 'रोमान्टिक',
+    icon: '💕',
+    words: [
+      'Kiss',
+      'Hug',
+      'Date',
+      'Love',
+      'Crush',
+      'Flirt',
+      'Proposal',
+      'Gift',
+      'Heart',
+      'Roses',
+      'Candlelight',
+      'Chocolate',
+      'Dinner',
+      'Intimacy',
+      'Passion',
+      'Affection',
+      'Cuddle',
+      'Romance',
+      'Valentine',
+      'Surprise',
+      'Compliment',
+      'Poetry',
+      'Laughter',
+      'Whisper',
+      'Handhold',
+      'Memory',
+      'Connection',
+      'Soulmate',
+      'Chemistry',
+      'Devotion'
+    ]
   }
 ];
 
@@ -1362,6 +1639,7 @@ let state = {
   thugIndex: null,
   currentRevealIndex: 0,
   firstPlayerIndex: 0,
+  firstNonThugSeen: false,
   round: 1,
   voteTarget: null,
   revealed: false,
@@ -1415,19 +1693,164 @@ function removePlayer(idx) {
 }
 
 function renderChips() {
-  const el = document.getElementById('player-chips');
+  const el = document.getElementById('player-list');
   el.innerHTML = state.players.map((p, i) => `
-    <div class="chip">
-      <span class="chip-num">${i+1}</span>
-      ${escHtml(p)}
-      <button class="chip-del" onclick="removePlayer(${i})">×</button>
+    <div class="drag-row" data-idx="${i}" style="
+      display:flex;align-items:center;gap:12px;
+      background:#fff;border-radius:50px;
+      padding:10px 16px;
+      box-shadow:0 2px 8px rgba(107,63,160,0.08);
+      border:2px solid transparent;
+      cursor:default;
+      user-select:none;
+      touch-action:none;
+      transition:box-shadow 0.15s, border-color 0.15s;
+    ">
+      <span style="
+        font-size:18px;color:var(--primary-light);
+        cursor:grab;padding:2px 4px;flex-shrink:0;
+        touch-action:none;
+      " class="drag-handle">☰</span>
+      <span style="
+        background:var(--primary);color:#fff;
+        width:24px;height:24px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:800;flex-shrink:0;
+      ">${i+1}</span>
+      <span style="font-weight:700;font-size:14px;color:var(--text);flex:1;">${escHtml(p)}</span>
+      <button onclick="removePlayer(${i})" style="
+        background:none;border:none;color:var(--primary-light);
+        font-size:18px;cursor:pointer;padding:0;line-height:1;
+        transition:color 0.15s;flex-shrink:0;
+      " onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--primary-light)'">×</button>
     </div>
   `).join('');
+
   const hint = document.getElementById('player-count-hint');
   const n = state.players.length;
   hint.textContent = n === 0 ? 'minimum 3 players required' :
     n < 3 ? `${n} added — need ${3-n} more` :
-    `${n} players ready ✓`;
+    `${n} players ready ✓ — drag ☰ to reorder`;
+
+  initDragToReorder();
+}
+
+function initDragToReorder() {
+  const container = document.getElementById('player-list');
+  let dragEl = null, ghost = null;
+  let startY = 0, offsetY = 0;
+  let dragIdx = -1, targetIdx = -1;
+
+  function getRows() { return [...container.querySelectorAll('.drag-row')]; }
+
+  function getRowHeight() {
+    const rows = getRows();
+    return rows.length > 0 ? rows[0].getBoundingClientRect().height + 8 : 50;
+  }
+
+  function onDragStart(e, handle) {
+    const row = handle.closest('.drag-row');
+    dragIdx = parseInt(row.dataset.idx);
+    const rect = row.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    offsetY = clientY - rect.top;
+    startY = clientY;
+
+    // Create ghost
+    ghost = row.cloneNode(true);
+    ghost.style.cssText = `
+      position:fixed;left:${rect.left}px;top:${rect.top}px;
+      width:${rect.width}px;opacity:0.92;z-index:9999;
+      pointer-events:none;border-radius:50px;
+      box-shadow:0 12px 32px rgba(107,63,160,0.25);
+      border:2px solid var(--primary-light);
+      background:#fff;
+      transition:none;
+    `;
+    document.body.appendChild(ghost);
+
+    // Dim the original
+    row.style.opacity = '0.3';
+
+    e.preventDefault();
+  }
+
+  function onDragMove(e) {
+    if (!ghost) return;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    ghost.style.top = (clientY - offsetY) + 'px';
+
+    // Determine target index based on which row's midpoint we're closest to
+    const rows = getRows();
+    const rowH = getRowHeight();
+    let newTarget = dragIdx;
+    rows.forEach((r, i) => {
+      if (i === dragIdx) return;
+      const rect = r.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (i < dragIdx && clientY < mid) newTarget = Math.min(newTarget, i);
+      if (i > dragIdx && clientY > mid) newTarget = Math.max(newTarget, i);
+    });
+
+    // Simpler approach: find closest row by midpoint
+    let closest = dragIdx;
+    let closestDist = Infinity;
+    rows.forEach((r, i) => {
+      const rect = r.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      const dist = Math.abs(clientY - mid);
+      if (dist < closestDist) { closestDist = dist; closest = i; }
+    });
+    newTarget = closest;
+
+    if (newTarget !== targetIdx) {
+      targetIdx = newTarget;
+      rows.forEach((r, i) => {
+        if (i === dragIdx) { r.style.transform = ''; return; }
+        if (dragIdx < targetIdx) {
+          r.style.transform = (i > dragIdx && i <= targetIdx) ? `translateY(-${rowH}px)` : '';
+        } else {
+          r.style.transform = (i >= targetIdx && i < dragIdx) ? `translateY(${rowH}px)` : '';
+        }
+        r.style.transition = 'transform 0.15s ease';
+      });
+    }
+    e.preventDefault();
+  }
+
+  function onDragEnd(e) {
+    if (!ghost) return;
+    ghost.remove();
+    ghost = null;
+
+    // Reset all transforms
+    getRows().forEach(r => {
+      r.style.transform = '';
+      r.style.opacity = '';
+      r.style.transition = '';
+    });
+
+    // Reorder the state array
+    if (targetIdx !== -1 && targetIdx !== dragIdx) {
+      const moved = state.players.splice(dragIdx, 1)[0];
+      state.players.splice(targetIdx, 0, moved);
+      renderChips();
+      updateStartBtn();
+    }
+    dragIdx = -1;
+    targetIdx = -1;
+  }
+
+  // Attach listeners to handles only
+  container.querySelectorAll('.drag-handle').forEach(handle => {
+    handle.addEventListener('mousedown', e => { onDragStart(e, handle); });
+    handle.addEventListener('touchstart', e => { onDragStart(e, handle); }, { passive: false });
+  });
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend', onDragEnd);
 }
 
 function updateStartBtn() {
@@ -1472,6 +1895,9 @@ function selectCategory(idx) {
   if (n === 0) hint.textContent = 'select at least one category';
   else if (n === 1) hint.textContent = `1 category selected`;
   else hint.textContent = `${n} categories selected — words combined!`;
+  // Keep select all button label in sync
+  const selAllBtn = document.getElementById('select-all-btn');
+  if (selAllBtn) selAllBtn.textContent = n === CATEGORIES.length ? '🔲 Deselect All' : '☑️ Select All Categories';
 }
 
 function pickRandomCategory() {
@@ -1485,6 +1911,31 @@ function pickRandomCategory() {
   selectCategory(idx);
 }
 
+function toggleSelectAll() {
+  const allSelected = state.selectedCategories.length === CATEGORIES.length;
+  if (allSelected) {
+    // Deselect all
+    state.selectedCategories = [];
+    document.querySelectorAll('.cat-tile').forEach((t, i) => {
+      t.classList.remove('selected');
+      document.getElementById(`cat-check-${i}`).style.display = 'none';
+    });
+    document.getElementById('cat-confirm-btn').disabled = true;
+    document.getElementById('cat-count-hint').textContent = 'select at least one category';
+    document.getElementById('select-all-btn').textContent = '☑️ Select All Categories';
+  } else {
+    // Select all
+    state.selectedCategories = CATEGORIES.map((_, i) => i);
+    document.querySelectorAll('.cat-tile').forEach((t, i) => {
+      t.classList.add('selected');
+      document.getElementById(`cat-check-${i}`).style.display = 'block';
+    });
+    document.getElementById('cat-confirm-btn').disabled = false;
+    document.getElementById('cat-count-hint').textContent = `${CATEGORIES.length} categories selected — words combined!`;
+    document.getElementById('select-all-btn').textContent = '🔲 Deselect All';
+  }
+}
+
 function goToCategory() {
   state.selectedCategories = [];
   document.querySelectorAll('.cat-tile').forEach((t, i) => {
@@ -1494,6 +1945,7 @@ function goToCategory() {
   });
   document.getElementById('cat-confirm-btn').disabled = true;
   document.getElementById('cat-count-hint').textContent = 'select at least one category';
+  document.getElementById('select-all-btn').textContent = '☑️ Select All Categories';
   showScreen('screen-category');
 }
 
@@ -1508,6 +1960,7 @@ function confirmCategory() {
   ) ?? state.selectedCategories[0];
   state.thugIndex = Math.floor(Math.random() * state.players.length);
   state.currentRevealIndex = 0;
+  state.firstNonThugSeen = false;
   state.round = 1;
   state.voteTarget = null;
 
@@ -1573,8 +2026,40 @@ function showRevealFor(idx) {
   const btn = document.getElementById('next-player-btn');
   btn.textContent = isLast ? '🎮 Start Game Discussion →' : `Next player →`;
 
+  // Show Reset Word button only for the FIRST non-thug player to reveal
+  const resetBtn = document.getElementById('reset-word-btn');
+  const isFirstNonThug = !isThug && !state.firstNonThugSeen;
+  resetBtn.style.display = isFirstNonThug ? 'flex' : 'none';
+  // Mark as seen once this non-thug player's screen is shown
+  if (isFirstNonThug) state.firstNonThugSeen = true;
+
   showScreen('screen-reveal');
   initDrag();
+}
+
+function resetWord() {
+  // Pick a new word from the combined pool, different from the current one
+  const combinedWords = state.selectedCategories.flatMap(i => CATEGORIES[i].words);
+  const remaining = combinedWords.filter(w => w !== state.selectedWord);
+  const pool = remaining.length > 0 ? remaining : combinedWords;
+  state.selectedWord = pool[Math.floor(Math.random() * pool.length)];
+  // Update which category it belongs to
+  state.selectedCategory = state.selectedCategories.find(i =>
+    CATEGORIES[i].words.includes(state.selectedWord)
+  ) ?? state.selectedCategories[0];
+  // Re-render the back card with the new word
+  const cat = CATEGORIES[state.selectedCategory];
+  document.getElementById('reveal-back').innerHTML = `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:52px;margin-bottom:12px">🏠</div>
+      <div style="font-size:12px;color:var(--subtext);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Secret Word</div>
+      <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--primary);line-height:1.2;padding:0 10px">${escHtml(state.selectedWord)}</div>
+      <div style="margin-top:10px">
+        <span style="font-size:11px;color:var(--subtext);background:#f0e8ff;border-radius:50px;padding:4px 12px;font-weight:600">${escHtml(cat.name)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--subtext);margin-top:12px;font-weight:600">Give a vague one-word clue.<br>Don't make it obvious!</div>
+    </div>
+  `;
 }
 
 function nextPlayer() {
@@ -1782,6 +2267,7 @@ function playAgain() {
   // Keep same players, go to category
   state.selectedCategories = [];
   state.selectedCategory = null;
+  state.firstNonThugSeen = false;
   state.selectedWord = null;
   state.thugIndex = null;
   state.currentRevealIndex = 0;
