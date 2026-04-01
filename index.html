@@ -2131,14 +2131,23 @@ function selectCategory(idx) {
 }
 
 function pickRandomCategory() {
-  // Clear all, pick one random
-  state.selectedCategories = [];
-  document.querySelectorAll('.cat-tile').forEach((t, i) => {
-    t.classList.remove('selected');
-    document.getElementById(`cat-check-${i}`).style.display = 'none';
-  });
+  // Pick a random category silently and immediately start the game
   const idx = Math.floor(Math.random() * CATEGORIES.length);
-  selectCategory(idx);
+  state.selectedCategories = [idx];
+
+  const combinedWords = CATEGORIES[idx].words;
+  state.selectedWord = combinedWords[Math.floor(Math.random() * combinedWords.length)];
+  state.selectedCategory = idx;
+  state.thugIndex = Math.floor(Math.random() * state.players.length);
+  state.currentRevealIndex = 0;
+  state.firstNonThugSeen = false;
+  state.round = 1;
+  state.voteTarget = null;
+
+  // Go straight to dealing — don't show which category was picked
+  showScreen('screen-dealing');
+  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players`;
+  setTimeout(() => startReveal(), 1800);
 }
 
 function toggleSelectAll() {
