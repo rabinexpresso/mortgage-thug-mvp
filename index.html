@@ -871,6 +871,8 @@
   <button class="btn btn-outline" id="reset-word-btn" onclick="resetWord()" style="display:none;">🔄 Reset Word</button>
   <div style="height:10px"></div>
   <p class="pass-hint">pass the phone to the next player after clicking next</p>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -908,6 +910,8 @@
   </div>
   <div style="height:36px"></div>
   <button class="btn btn-primary" onclick="showGameScreen()">🗣️ Start Discussion →</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -942,6 +946,8 @@
   <div class="order-list" id="game-order-list"></div>
   <div style="height:28px"></div>
   <button class="btn btn-primary" onclick="showScreen('screen-vote')">🗳️ Vote for the Thug!</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -959,6 +965,8 @@
   <p class="error-msg" id="vote-error"></p>
   <div style="height:16px"></div>
   <button class="btn btn-primary" onclick="submitVote()">✅ Confirm Vote</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -986,6 +994,8 @@
   </div>
   <div style="height:20px"></div>
   <p class="faded text-center">Hint: it's an Australian mortgage term 😉</p>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -1683,6 +1693,70 @@ const CATEGORIES = [
       'Chemistry',
       'Devotion'
     ]
+  },
+
+  // ── CATEGORY 16: OVER 21+ ─────────────────────────────────────────────────
+  {
+    id: 'over-21',
+    name: 'Over 18+',
+    nepali: '१८+ मात्र',
+    icon: '🔞',
+    words: [
+      'Doggystyle',
+      'Missionary',
+      'Cowgirl',
+      'Spoon',
+      '69',
+      'Reverse Cowgirl',
+      '50 Shades of Grey',
+      'Spanking',
+      'Sugar Daddy',
+      'Sugar Mommy',
+      'Gold Digger',
+      'Moan',
+      'Orgasm',
+      'G Spot',
+      'Squirting',
+      'Ejaculation',
+      'Karmasutra',
+      'Wanker',
+      'Booty Call',
+      'One Night Stand',
+      'Ghosting',
+      'Situationship',
+      'Friends with Benefits',
+      'Cougar',
+      'Toyboy',
+      'Fling',
+      'Rebound',
+      'Side Piece',
+      'Open Relationship',
+      'Breadcrumbing',
+      'Soft Launch',
+      'Talking Stage',
+      'Walk of Shame',
+      'Drunk Text',
+      'Walk of Pride',
+      'Foreplay',
+      'Dirty Talk',
+      'BDSM',
+      'MILF',
+      'Bikini Body',
+      'OnlyFans',
+      'Love Bombing',
+      'Entanglement',
+      'Body Count',
+      'Twerking',
+      'Lap Dance',
+      'Body Shot',
+      'Striptease',
+      'Sexting',
+      'Swinger',
+      'Threesome',
+      'Polyamory',
+      'Happy Ending',
+      'No Strings Attached'
+    ]
   }
 ];
 
@@ -1990,6 +2064,19 @@ function toggleSelectAll() {
     document.getElementById('cat-count-hint').textContent = `${CATEGORIES.length} categories selected — words combined!`;
     document.getElementById('select-all-btn').textContent = '🔲 Deselect All';
   }
+}
+
+function backToSetup() {
+  // Reset all game state but keep players list intact
+  state.selectedCategories = [];
+  state.selectedCategory = null;
+  state.selectedWord = null;
+  state.thugIndex = null;
+  state.currentRevealIndex = 0;
+  state.firstNonThugSeen = false;
+  state.round = 1;
+  state.voteTarget = null;
+  showScreen('screen-setup');
 }
 
 function goToCategory() {
