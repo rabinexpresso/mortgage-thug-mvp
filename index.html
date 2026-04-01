@@ -1695,7 +1695,7 @@ const CATEGORIES = [
     ]
   },
 
-  // ── CATEGORY 16: OVER 21+ ─────────────────────────────────────────────────
+  // ── CATEGORY 16: OVER 18+ ─────────────────────────────────────────────────
   {
     id: 'over-21',
     name: 'Over 18+',
@@ -1756,6 +1756,106 @@ const CATEGORIES = [
       'Polyamory',
       'Happy Ending',
       'No Strings Attached'
+    ]
+  },
+
+  // ── CATEGORY 17: PLACES ───────────────────────────────────────────────────
+  {
+    id: 'places',
+    name: 'Places',
+    nepali: 'ठाउँहरू',
+    icon: '🌍',
+    words: [
+      'Nepal',
+      'India',
+      'China',
+      'Japan',
+      'United States',
+      'United Kingdom',
+      'Australia',
+      'Canada',
+      'Germany',
+      'France',
+      'Italy',
+      'Spain',
+      'Brazil',
+      'Russia',
+      'South Korea',
+      'Thailand',
+      'Indonesia',
+      'Mexico',
+      'South Africa',
+      'Turkey',
+      'Kathmandu',
+      'Tokyo',
+      'New York',
+      'London',
+      'Paris',
+      'Dubai',
+      'Singapore',
+      'Bangkok',
+      'Sydney',
+      'Los Angeles',
+      'Toronto',
+      'Berlin',
+      'Rome',
+      'Barcelona',
+      'Istanbul',
+      'Seoul',
+      'Shanghai',
+      'Mumbai',
+      'Cape Town',
+      'Rio de Janeiro'
+    ]
+  },
+
+  // ── CATEGORY 18: HOLLYWOOD MOVIES ────────────────────────────────────────
+  {
+    id: 'hollywood-movies',
+    name: 'Hollywood Movies',
+    nepali: 'हलिउड चलचित्र',
+    icon: '🎬',
+    words: [
+      'Titanic',
+      'Avatar',
+      'Avengers: Endgame',
+      'The Dark Knight',
+      'Inception',
+      'Interstellar',
+      'The Matrix',
+      'Forrest Gump',
+      'Gladiator',
+      'The Lion King',
+      'Jurassic Park',
+      'Jaws',
+      'The Godfather',
+      'The Shawshank Redemption',
+      'Pulp Fiction',
+      'Fight Club',
+      'The Wolf of Wall Street',
+      'The Social Network',
+      'La La Land',
+      'Whiplash',
+      'The Pursuit of Happyness',
+      'The Revenant',
+      'Django Unchained',
+      'Inglourious Basterds',
+      'The Departed',
+      'Shutter Island',
+      'Gone Girl',
+      'Se7en',
+      'The Silence of the Lambs',
+      'Saving Private Ryan',
+      'Top Gun',
+      'Top Gun: Maverick',
+      'Mission: Impossible',
+      'John Wick',
+      'Mad Max: Fury Road',
+      'The Hunger Games',
+      "Harry Potter and the Sorcerer's Stone",
+      'The Lord of the Rings: The Fellowship of the Ring',
+      'Frozen',
+      'Toy Story'
     ]
   }
 ];
@@ -2164,10 +2264,11 @@ function showRevealFor(idx) {
   cover.style.top = '0';
   cover.style.pointerEvents = 'auto';
 
-  // Set next button label
+  // Set next button label and disable until cover is dragged away
   const isLast = idx === state.players.length - 1;
   const btn = document.getElementById('next-player-btn');
   btn.textContent = isLast ? '🎮 Start Game Discussion →' : `Next player →`;
+  btn.disabled = true;
 
   // Show Reset Word button only for the FIRST non-thug player to reveal
   const resetBtn = document.getElementById('reset-word-btn');
@@ -2255,6 +2356,8 @@ function initDrag() {
       cover.style.transform = `translate(${dx*2}px, ${dy*2}px) rotate(20deg)`;
       cover.style.opacity = '0';
       cover.style.pointerEvents = 'none';
+      // Enable the Next Player button now that role has been revealed
+      document.getElementById('next-player-btn').disabled = false;
     }
   }
 
