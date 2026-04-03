@@ -1867,6 +1867,8 @@ let state = {
   selectedCategory: null,
   selectedWord: null,
   thugIndex: null,
+  lastThugIndex: null,
+  thugQueue: [],
   currentRevealIndex: 0,
   firstPlayerIndex: 0,
   firstNonThugSeen: false,
@@ -1875,7 +1877,35 @@ let state = {
   revealed: false,
 };
 
-// ── SCREEN NAV ──
+// ── THUG SELECTION — SHUFFLE ROTATION ──
+// Everyone gets a turn before anyone repeats.
+// thugQueue holds a shuffled list of player indices.
+// We pop from it each round; when empty, reshuffle.
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickThug() {
+  const n = state.players.length;
+  // If queue is empty or stale (player count changed), rebuild it
+  if (!state.thugQueue || state.thugQueue.length === 0) {
+    let newQueue = shuffleArray(Array.from({length: n}, (_, i) => i));
+    // Avoid the last thug being first in the new queue (prevent back-to-back across reshuffles)
+    if (newQueue[0] === state.lastThugIndex && n > 1) {
+      // Swap first element with a random other position
+      const swapIdx = Math.floor(Math.random() * (n - 1)) + 1;
+      [newQueue[0], newQueue[swapIdx]] = [newQueue[swapIdx], newQueue[0]];
+    }
+    state.thugQueue = newQueue;
+  }
+  return state.thugQueue.pop();
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -1901,6 +1931,7 @@ function addPlayer() {
   }
 
   state.players.push(name);
+  state.thugQueue = []; // reset queue since player count changed
   input.value = '';
   err.textContent = '';
   renderChips();
@@ -1918,6 +1949,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function removePlayer(idx) {
   state.players.splice(idx, 1);
+  state.thugQueue = []; // reset queue since player count changed
   renderChips();
   updateStartBtn();
 }
@@ -2138,7 +2170,8 @@ function pickRandomCategory() {
   const combinedWords = CATEGORIES[idx].words;
   state.selectedWord = combinedWords[Math.floor(Math.random() * combinedWords.length)];
   state.selectedCategory = idx;
-  state.thugIndex = Math.floor(Math.random() * state.players.length);
+  state.thugIndex = pickThug();
+  state.lastThugIndex = state.thugIndex;
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
@@ -2181,6 +2214,8 @@ function backToSetup() {
   state.selectedCategory = null;
   state.selectedWord = null;
   state.thugIndex = null;
+  state.lastThugIndex = null;
+  state.thugQueue = [];
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
@@ -2210,7 +2245,8 @@ function confirmCategory() {
   state.selectedCategory = state.selectedCategories.find(idx =>
     CATEGORIES[idx].words.includes(state.selectedWord)
   ) ?? state.selectedCategories[0];
-  state.thugIndex = Math.floor(Math.random() * state.players.length);
+  state.thugIndex = pickThug();
+  state.lastThugIndex = state.thugIndex;
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
