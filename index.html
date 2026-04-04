@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:25:55">
+<meta name="build-time" content="2026-04-04T06:34:07">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2771,15 +2771,16 @@ function getInitials(name) {
 }
 
 // ── AUTO-UPDATE CHECKER ──
-// Uses GitHub API to check latest commit time — works on Safari iPhone
-// because api.github.com is a different domain and cannot be cached by the browser.
+// Fetches index.html directly from raw.githubusercontent.com (different domain
+// from GitHub Pages, so Safari cannot cache it) and compares the build-time
+// meta tag. No extra files needed — just upload index.html as normal.
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
   let bannerShown = false;
   const currentBuildTime = document.querySelector('meta[name="build-time"]')?.content || '';
 
-  // GitHub API endpoint — returns latest commit info for this repo
-  const GITHUB_API = 'https://api.github.com/repos/rabinexpresso/mortgage-thug-mvp/commits?path=index.html&per_page=1';
+  // Raw GitHub URL — different domain from Pages, bypasses Safari cache
+  const RAW_URL = 'https://raw.githubusercontent.com/rabinexpresso/mortgage-thug-mvp/main/index.html';
 
   // Create the update banner
   const banner = document.createElement('div');
@@ -2823,27 +2824,19 @@ function getInitials(name) {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
-  // Store the latest commit SHA seen so far
-  let knownCommitSha = null;
-
   async function checkForUpdate() {
     if (bannerShown) return;
     try {
-      const res = await fetch(GITHUB_API + '&t=' + Date.now(), {
-        cache: 'no-store',
-        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      // Fetch from raw.githubusercontent.com — Safari cannot cache this domain
+      const res = await fetch(RAW_URL + '?t=' + Date.now(), {
+        cache: 'no-store'
       });
       if (!res.ok) return;
-      const data = await res.json();
-      if (!data || !data[0]) return;
-      const latestSha = data[0].sha;
-      const latestTime = data[0].commit.committer.date;
-
-      if (knownCommitSha === null) {
-        // First check — store baseline commit SHA
-        knownCommitSha = latestSha;
-      } else if (latestSha !== knownCommitSha) {
-        // New commit detected — show banner
+      const html = await res.text();
+      // Extract build-time from the live raw file
+      const match = html.match(/<meta name="build-time" content="([^"]+)"/);
+      const liveBuildTime = match ? match[1] : '';
+      if (liveBuildTime && liveBuildTime !== currentBuildTime) {
         bannerShown = true;
         banner.style.display = 'flex';
       }
