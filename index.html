@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:49:48">
+<meta name="build-time" content="2026-04-04T06:53:26">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2833,15 +2833,15 @@ function getInitials(name) {
 }
 
 // ── AUTO-UPDATE CHECKER ──
-// Uses GitHub Commits API — not cached by any browser including Safari.
-// Compares latest commit SHA against the one stored on first load.
+// Uses GitHub Git Refs API — tiny response, never cached, works on all browsers
+// including Safari iOS. No authentication needed for public repos.
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
   let bannerShown = false;
   let baselineSha = null;
 
-  // GitHub commits API — always returns fresh data, never cached
-  const API_URL = 'https://api.github.com/repos/rabinexpresso/mortgage-thug-mvp/commits/main';
+  // Git refs API — returns just the latest commit SHA, very fast and never cached
+  const REFS_URL = 'https://api.github.com/repos/rabinexpresso/mortgage-thug-mvp/git/ref/heads/main';
 
   // Create the update banner
   const banner = document.createElement('div');
@@ -2885,33 +2885,26 @@ function getInitials(name) {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
-  async function getLatestSha() {
-    const res = await fetch(API_URL + '?t=' + Date.now(), {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data && data.sha ? data.sha : null;
-  }
-
   async function checkForUpdate() {
     if (bannerShown) return;
     try {
-      const sha = await getLatestSha();
+      const res = await fetch(REFS_URL + '?t=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const sha = data && data.object && data.object.sha ? data.object.sha : null;
       if (!sha) return;
       if (baselineSha === null) {
-        // First check — store baseline
-        baselineSha = sha;
+        baselineSha = sha; // store baseline on first check
       } else if (sha !== baselineSha) {
-        // New commit — show banner
         bannerShown = true;
         banner.style.display = 'flex';
       }
     } catch(e) {}
   }
 
-  // First check at 10s sets baseline, then every 5 min compares
   window.addEventListener('load', () => {
     setTimeout(() => {
       checkForUpdate();
