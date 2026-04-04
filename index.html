@@ -2667,6 +2667,89 @@ function escHtml(s) {
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 }
+
+// ── AUTO-UPDATE CHECKER ──
+// Polls the current page URL every 2 minutes.
+// If the file has changed (different ETag or Last-Modified), shows a banner.
+(function() {
+  const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
+  let currentEtag = null;
+  let bannerShown = false;
+
+  // Create the update banner (hidden initially)
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.innerHTML = `
+    <span>🆕 New update available!</span>
+    <button onclick="window.location.reload()">Tap to refresh</button>
+    <button onclick="document.getElementById('update-banner').style.display='none'" style="background:transparent;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;padding:0 4px;">×</button>
+  `;
+  banner.style.cssText = `
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(90deg, #6b3fa0, #9b5de5);
+    color: #fff;
+    padding: 14px 20px;
+    text-align: center;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(107,63,160,0.4);
+    animation: slideUp 0.4s ease;
+  `;
+  // Style the refresh button inside banner
+  const style = document.createElement('style');
+  style.textContent = `
+    #update-banner button:first-of-type {
+      background: #fff;
+      color: var(--primary);
+      border: none;
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: var(--font-main);
+    }
+    #update-banner button:first-of-type:active { transform: scale(0.96); }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(banner);
+
+  async function checkForUpdate() {
+    try {
+      const res = await fetch(window.location.href, {
+        method: 'HEAD',
+        cache: 'no-store'
+      });
+      const etag = res.headers.get('etag') || res.headers.get('last-modified');
+      if (etag) {
+        if (currentEtag === null) {
+          // First check — store baseline
+          currentEtag = etag;
+        } else if (etag !== currentEtag && !bannerShown) {
+          // File has changed — show banner
+          bannerShown = true;
+          banner.style.display = 'flex';
+        }
+      }
+    } catch(e) {
+      // Silently ignore network errors
+    }
+  }
+
+  // Start polling after page loads
+  window.addEventListener('load', () => {
+    checkForUpdate(); // initial baseline
+    setInterval(checkForUpdate, POLL_INTERVAL);
+  });
+})();
 </script>
 </body>
 </html>
