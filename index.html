@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:15:31">
+<meta name="build-time" content="2026-04-04T06:19:29">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2871,6 +2871,51 @@ function getInitials(name) {
     if (bannerShown) return;
     checkWithFetch();
   }
+
+  // DEBUG overlay — shows what's happening on mobile (remove after testing)
+  const debug = document.createElement('div');
+  debug.id = 'update-debug';
+  debug.style.cssText = `
+    position: fixed; top: 60px; left: 10px; right: 10px;
+    background: rgba(0,0,0,0.75); color: #fff;
+    font-size: 11px; padding: 8px 12px; border-radius: 8px;
+    z-index: 99999; font-family: monospace; line-height: 1.6;
+    display: none;
+  `;
+  document.body.appendChild(debug);
+
+  function debugLog(msg) {
+    debug.style.display = 'block';
+    debug.innerHTML += new Date().toLocaleTimeString() + ' — ' + msg + '<br>';
+  }
+
+  // Override checkWithFetch to include debug logging
+  const _origCheck = checkWithFetch;
+  checkWithFetch = async function() {
+    debugLog('Fetching live file…');
+    try {
+      const url = window.location.href.split('?')[0] + '?nocache=' + Date.now() + '&r=' + Math.random();
+      const res = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+      });
+      const html = await res.text();
+      const match = html.match(/<meta name="build-time" content="([^"]+)"/);
+      const liveBuildTime = match ? match[1] : 'NOT FOUND';
+      debugLog('Live: ' + liveBuildTime);
+      debugLog('Mine: ' + currentBuildTime);
+      if (liveBuildTime !== currentBuildTime && liveBuildTime !== 'NOT FOUND') {
+        debugLog('✅ DIFFERENT — showing banner');
+        showBanner();
+      } else {
+        debugLog('⚠️ SAME — no update');
+      }
+    } catch(e) {
+      debugLog('Fetch failed: ' + e.message + ' — trying XHR');
+      checkWithXHR();
+    }
+  };
 
   // First check after 10s, then every 5 minutes
   window.addEventListener('load', () => {
