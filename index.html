@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:46:09">
+<meta name="build-time" content="2026-04-04T06:49:48">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2833,16 +2833,15 @@ function getInitials(name) {
 }
 
 // ── AUTO-UPDATE CHECKER ──
-// Fetches index.html directly from raw.githubusercontent.com (different domain
-// from GitHub Pages, so Safari cannot cache it) and compares the build-time
-// meta tag. No extra files needed — just upload index.html as normal.
+// Uses GitHub Commits API — not cached by any browser including Safari.
+// Compares latest commit SHA against the one stored on first load.
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
   let bannerShown = false;
-  const currentBuildTime = document.querySelector('meta[name="build-time"]')?.content || '';
+  let baselineSha = null;
 
-  // Raw GitHub URL — different domain from Pages, bypasses Safari cache
-  const RAW_URL = 'https://raw.githubusercontent.com/rabinexpresso/mortgage-thug-mvp/main/index.html';
+  // GitHub commits API — always returns fresh data, never cached
+  const API_URL = 'https://api.github.com/repos/rabinexpresso/mortgage-thug-mvp/commits/main';
 
   // Create the update banner
   const banner = document.createElement('div');
@@ -2886,28 +2885,33 @@ function getInitials(name) {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
+  async function getLatestSha() {
+    const res = await fetch(API_URL + '?t=' + Date.now(), {
+      cache: 'no-store',
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.sha ? data.sha : null;
+  }
+
   async function checkForUpdate() {
     if (bannerShown) return;
     try {
-      // Fetch from raw.githubusercontent.com — Safari cannot cache this domain
-      const res = await fetch(RAW_URL + '?t=' + Date.now(), {
-        cache: 'no-store'
-      });
-      if (!res.ok) return;
-      const html = await res.text();
-      // Extract build-time from the live raw file
-      const match = html.match(/<meta name="build-time" content="([^"]+)"/);
-      const liveBuildTime = match ? match[1] : '';
-      if (liveBuildTime && liveBuildTime !== currentBuildTime) {
+      const sha = await getLatestSha();
+      if (!sha) return;
+      if (baselineSha === null) {
+        // First check — store baseline
+        baselineSha = sha;
+      } else if (sha !== baselineSha) {
+        // New commit — show banner
         bannerShown = true;
         banner.style.display = 'flex';
       }
-    } catch(e) {
-      // Silently ignore errors
-    }
+    } catch(e) {}
   }
 
-  // First check after 10s, then every 5 minutes
+  // First check at 10s sets baseline, then every 5 min compares
   window.addEventListener('load', () => {
     setTimeout(() => {
       checkForUpdate();
