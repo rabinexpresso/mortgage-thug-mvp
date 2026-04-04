@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:19:29">
+<meta name="build-time" content="2026-04-04T06:25:55">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2771,10 +2771,15 @@ function getInitials(name) {
 }
 
 // ── AUTO-UPDATE CHECKER ──
+// Uses GitHub API to check latest commit time — works on Safari iPhone
+// because api.github.com is a different domain and cannot be cached by the browser.
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
   let bannerShown = false;
   const currentBuildTime = document.querySelector('meta[name="build-time"]')?.content || '';
+
+  // GitHub API endpoint — returns latest commit info for this repo
+  const GITHUB_API = 'https://api.github.com/repos/rabinexpresso/mortgage-thug-mvp/commits?path=index.html&per_page=1';
 
   // Create the update banner
   const banner = document.createElement('div');
@@ -2818,104 +2823,34 @@ function getInitials(name) {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
-  function showBanner() {
-    bannerShown = true;
-    banner.style.display = 'flex';
-  }
+  // Store the latest commit SHA seen so far
+  let knownCommitSha = null;
 
-  function parseAndCompare(html) {
-    const match = html.match(/<meta name="build-time" content="([^"]+)"/);
-    const liveBuildTime = match ? match[1] : '';
-    if (liveBuildTime && liveBuildTime !== currentBuildTime) {
-      showBanner();
-    }
-  }
-
-  function checkWithXHR() {
-    // XMLHttpRequest — more reliable on mobile Safari than fetch
-    const xhr = new XMLHttpRequest();
-    const url = window.location.href.split('?')[0] + '?nocache=' + Date.now() + '&r=' + Math.random();
-    xhr.open('GET', url, true);
-    xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    xhr.setRequestHeader('Pragma', 'no-cache');
-    xhr.setRequestHeader('Expires', '0');
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        parseAndCompare(xhr.responseText);
-      }
-    };
-    xhr.onerror = function() {}; // silently ignore
-    xhr.send();
-  }
-
-  async function checkWithFetch() {
-    try {
-      const url = window.location.href.split('?')[0] + '?nocache=' + Date.now() + '&r=' + Math.random();
-      const res = await fetch(url, {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      });
-      const html = await res.text();
-      parseAndCompare(html);
-    } catch(e) {
-      // Fetch failed — try XHR as fallback
-      checkWithXHR();
-    }
-  }
-
-  function checkForUpdate() {
+  async function checkForUpdate() {
     if (bannerShown) return;
-    checkWithFetch();
-  }
-
-  // DEBUG overlay — shows what's happening on mobile (remove after testing)
-  const debug = document.createElement('div');
-  debug.id = 'update-debug';
-  debug.style.cssText = `
-    position: fixed; top: 60px; left: 10px; right: 10px;
-    background: rgba(0,0,0,0.75); color: #fff;
-    font-size: 11px; padding: 8px 12px; border-radius: 8px;
-    z-index: 99999; font-family: monospace; line-height: 1.6;
-    display: none;
-  `;
-  document.body.appendChild(debug);
-
-  function debugLog(msg) {
-    debug.style.display = 'block';
-    debug.innerHTML += new Date().toLocaleTimeString() + ' — ' + msg + '<br>';
-  }
-
-  // Override checkWithFetch to include debug logging
-  const _origCheck = checkWithFetch;
-  checkWithFetch = async function() {
-    debugLog('Fetching live file…');
     try {
-      const url = window.location.href.split('?')[0] + '?nocache=' + Date.now() + '&r=' + Math.random();
-      const res = await fetch(url, {
-        method: 'GET',
+      const res = await fetch(GITHUB_API + '&t=' + Date.now(), {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
       });
-      const html = await res.text();
-      const match = html.match(/<meta name="build-time" content="([^"]+)"/);
-      const liveBuildTime = match ? match[1] : 'NOT FOUND';
-      debugLog('Live: ' + liveBuildTime);
-      debugLog('Mine: ' + currentBuildTime);
-      if (liveBuildTime !== currentBuildTime && liveBuildTime !== 'NOT FOUND') {
-        debugLog('✅ DIFFERENT — showing banner');
-        showBanner();
-      } else {
-        debugLog('⚠️ SAME — no update');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || !data[0]) return;
+      const latestSha = data[0].sha;
+      const latestTime = data[0].commit.committer.date;
+
+      if (knownCommitSha === null) {
+        // First check — store baseline commit SHA
+        knownCommitSha = latestSha;
+      } else if (latestSha !== knownCommitSha) {
+        // New commit detected — show banner
+        bannerShown = true;
+        banner.style.display = 'flex';
       }
     } catch(e) {
-      debugLog('Fetch failed: ' + e.message + ' — trying XHR');
-      checkWithXHR();
+      // Silently ignore errors
     }
-  };
+  }
 
   // First check after 10s, then every 5 minutes
   window.addEventListener('load', () => {
