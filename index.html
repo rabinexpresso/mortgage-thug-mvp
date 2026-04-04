@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="build-time" content="2026-04-04T06:10:49">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2770,12 +2771,17 @@ function getInitials(name) {
 }
 
 // ── AUTO-UPDATE CHECKER ──
-// Fetches the live page every 90 seconds and compares a fingerprint
-// of the live file's content against the current file.
-// No manual version string needed — works automatically on every upload.
+// Compares the <meta name="build-time"> tag in the loaded page
+// against the live version fetched from GitHub every 5 minutes.
+// To trigger an update notification: change the build-time meta content
+// in the <head> each time you upload a new version to GitHub.
+// e.g. <meta name="build-time" content="2025-04-05T10:30:00">
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
   let bannerShown = false;
+
+  // Read the build-time of the currently loaded page
+  const currentBuildTime = document.querySelector('meta[name="build-time"]')?.content || '';
 
   // Create the update banner
   const banner = document.createElement('div');
@@ -2819,30 +2825,17 @@ function getInitials(name) {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
-  // Simple hash function — converts file content into a short numeric fingerprint
-  function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return hash;
-  }
-
-  // Baseline = hash of the HTML currently loaded in the browser (the old version)
-  const currentFingerprint = simpleHash(document.documentElement.outerHTML);
-
   async function checkForUpdate() {
     if (bannerShown) return;
     try {
-      // Fetch the live file from GitHub with cache-busting
-      const res = await fetch(window.location.pathname + '?nocache=' + Date.now(), {
+      const res = await fetch(window.location.href.split('?')[0] + '?nocache=' + Date.now(), {
         cache: 'no-store'
       });
-      const liveHtml = await res.text();
-      const liveFingerprint = simpleHash(liveHtml);
-      if (liveFingerprint !== currentFingerprint) {
-        // Live file is different from what's loaded — show banner
+      const html = await res.text();
+      // Extract build-time from the live file
+      const match = html.match(/<meta name="build-time" content="([^"]+)"/);
+      const liveBuildTime = match ? match[1] : '';
+      if (liveBuildTime && liveBuildTime !== currentBuildTime) {
         bannerShown = true;
         banner.style.display = 'flex';
       }
