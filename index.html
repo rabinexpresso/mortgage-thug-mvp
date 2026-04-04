@@ -2775,7 +2775,6 @@ function getInitials(name) {
 // No manual version string needed — works automatically on every upload.
 (function() {
   const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
-  let currentFingerprint = null;
   let bannerShown = false;
 
   // Create the update banner
@@ -2830,36 +2829,32 @@ function getInitials(name) {
     return hash;
   }
 
-  async function getFingerprint() {
-    try {
-      const res = await fetch(window.location.pathname + '?nocache=' + Date.now(), {
-        cache: 'no-store'
-      });
-      const html = await res.text();
-      return simpleHash(html);
-    } catch(e) {
-      return null;
-    }
-  }
+  // Baseline = hash of the HTML currently loaded in the browser (the old version)
+  const currentFingerprint = simpleHash(document.documentElement.outerHTML);
 
   async function checkForUpdate() {
     if (bannerShown) return;
-    const liveFingerprint = await getFingerprint();
-    if (liveFingerprint === null) return; // network error, skip
-    if (currentFingerprint === null) {
-      // First run — store baseline fingerprint of current live file
-      currentFingerprint = liveFingerprint;
-    } else if (liveFingerprint !== currentFingerprint) {
-      // File has changed — show banner
-      bannerShown = true;
-      banner.style.display = 'flex';
+    try {
+      // Fetch the live file from GitHub with cache-busting
+      const res = await fetch(window.location.pathname + '?nocache=' + Date.now(), {
+        cache: 'no-store'
+      });
+      const liveHtml = await res.text();
+      const liveFingerprint = simpleHash(liveHtml);
+      if (liveFingerprint !== currentFingerprint) {
+        // Live file is different from what's loaded — show banner
+        bannerShown = true;
+        banner.style.display = 'flex';
+      }
+    } catch(e) {
+      // Silently ignore network errors
     }
   }
 
-  // Wait 10s after load for baseline, then poll every 5 minutes
+  // First check after 10s, then every 5 minutes
   window.addEventListener('load', () => {
     setTimeout(() => {
-      checkForUpdate(); // sets baseline
+      checkForUpdate();
       setInterval(checkForUpdate, POLL_INTERVAL);
     }, 10000);
   });
