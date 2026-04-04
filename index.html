@@ -819,7 +819,7 @@
   <button class="back-btn" onclick="showScreen('screen-setup')">←</button>
   <div style="height:56px"></div>
   <p class="section-title text-center">Choose a Category</p>
-  <p class="section-sub text-center">Pick one or more topics — word is drawn from the combined pool</p>
+  <p class="section-sub text-center" id="cat-screen-sub">Pick one or more topics — word is drawn from the combined pool</p>
   <div style="height:16px"></div>
   <div class="cat-grid" id="cat-grid"></div>
   <div style="height:24px"></div>
@@ -1748,8 +1748,8 @@ const CATEGORIES = [
       'Fetish',
       'Hookup',
       'Boka',
-      'Lado',
-      'Putih', 'Fuckface', 'Dickhead', 'Bukkake', 'Orgy', 'Cumshot', 'Machickney', 'Cunninglingus', 'Blowjob', 'Deepthroat', 'Masturbator', 'Tranny', 
+      'Lado', 'homosexual,'anal sex','mia khalifa', 'gangbang', 'pornhub','cuckold','Grandma I Love To Fuck','Huge breasts','Vagina','Balls','Penis','Cocksucker','Oral sex','Motherfucker','Incest','Molest',
+      'Fuckface', 'Dickhead', 'Bukkake', 'Orgy', 'Cumshot', 'Machickney', 'Cunninglingus', 'Blowjob', 'Deepthroat', 'Masturbator', 'Tranny', 
     ]
   },
 
@@ -1939,6 +1939,104 @@ const CATEGORIES = [
       'Limbu',
       'Tamang',
       'Yadav'
+    ]
+  },
+
+  // ── CATEGORY 21: WWE WRESTLING ────────────────────────────────────────────
+  {
+    id: 'wwe',
+    name: 'WWE Wrestling',
+    nepali: 'WWE कुस्ती',
+    icon: '🤼',
+    words: [
+      'Shawn Michaels',
+      'Triple H',
+      'Stone Cold Steve Austin',
+      'The Rock',
+      'The Undertaker',
+      'Mick Foley',
+      'Kane',
+      'Chyna',
+      'John Cena',
+      'Randy Orton',
+      'Brock Lesnar',
+      'Edge',
+      'Rey Mysterio',
+      'Batista',
+      'Kurt Angle',
+      'Chris Jericho',
+      'CM Punk',
+      'Trish Stratus',
+      'Lita',
+      'Rhea Ripley',
+      'Roman Reigns',
+      'Seth Rollins',
+      'Cody Rhodes',
+      'Rikishi',
+      'Hulk Hogan',
+      'Andre the Giant',
+      'Macho Man Randy Savage',
+      'Ric Flair',
+      'The Iron Sheik',
+      'Bret Hart',
+      'Razor Ramon',
+      'Diesel',
+      'The British Bulldog',
+      'Yokozuna',
+      'Owen Hart',
+      'The Dudley Boyz',
+      'The Hardy Boyz',
+      'Christian',
+      'Rob Van Dam',
+      'Scott Steiner',
+      'Goldberg',
+      'Logan Paul'
+    ]
+  },
+
+  // ── CATEGORY 22: ANIMALS ──────────────────────────────────────────────────
+  {
+    id: 'animals',
+    name: 'Animals',
+    nepali: 'जनावरहरू',
+    icon: '🦁',
+    words: [
+      'Woolly Mammoth',
+      'Saber-Toothed Cat',
+      'Tyrannosaurus Rex',
+      'Triceratops',
+      'Elephant',
+      'Panda',
+      'Whale',
+      'Lion',
+      'Penguin',
+      'Chicken',
+      'Tiger',
+      'Rhinoceros',
+      'Snow Leopard',
+      'Crocodile',
+      'Dog',
+      'Goldfish',
+      'Hamster',
+      'Rabbit',
+      'Cow',
+      'Pig',
+      'Goat',
+      'Sheep',
+      'Horse',
+      'Duck',
+      'Squirrel',
+      'Pigeon',
+      'Sparrow',
+      'Frog',
+      'Butterfly',
+      'Mouse',
+      'Honeybee',
+      'Ant',
+      'Caterpillar',
+      'Fish',
+      'Turtle',
+      'Crab'
     ]
   }
 ];
@@ -2218,6 +2316,9 @@ function renderCategoryGrid() {
       <span class="cat-check" id="cat-check-${i}" style="display:none;margin-top:4px;font-size:16px;">✅</span>
     </div>
   `).join('');
+  // Show total category count in subtitle
+  const sub = document.getElementById('cat-screen-sub');
+  if (sub) sub.textContent = `${CATEGORIES.length} categories — pick one or more, word drawn from combined pool`;
 }
 
 function selectCategory(idx) {
