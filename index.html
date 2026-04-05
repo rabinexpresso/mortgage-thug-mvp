@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-04T06:53:26">
+<meta name="build-time" content="2026-04-05T16:13:15">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="धितो ठग">
+<meta name="theme-color" content="#6b3fa0">
+<link rel="manifest" href="manifest.json">
 <title>धितो ठग — Mortgage Thug</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -741,6 +746,14 @@
   .mt-auto { margin-top: auto; }
   .faded { opacity: 0.55; font-size: 12px; font-weight: 600; color: var(--subtext); }
 
+  .cat-tile.locked-tile {
+    opacity: 0.7;
+    background: #f5f5f5;
+    border-color: #ccc;
+    color: var(--subtext);
+  }
+  .cat-tile.locked-tile:hover { background: #efefef; border-color: #bbb; }
+
   /* Reveal animation */
   .cover-removed { animation: flyOut 0.5s cubic-bezier(.34,1.56,.64,1) forwards; }
   @keyframes flyOut {
@@ -779,8 +792,43 @@
   <button class="btn btn-primary" onclick="showScreen('screen-setup')">🎮 Setup the Game</button>
   <div style="height:12px"></div>
   <button class="btn btn-outline" onclick="openHowToPlay()">📖 How to Play</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" onclick="showQR()">📱 Share QR Code</button>
   <div style="height:20px"></div>
   <div class="brand-strip">🏠 Alaya · Home Loan Experts · धितो ठग</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL: QR CODE                             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-qr" onclick="closeModal('modal-qr')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-title">📱 Scan to Play</div>
+    <p style="text-align:center;font-size:13px;color:var(--subtext);font-weight:600;margin-bottom:20px;">Share this QR code with your group</p>
+    <div style="display:flex;justify-content:center;margin-bottom:20px;">
+      <div id="qr-container" style="background:#fff;padding:16px;border-radius:16px;box-shadow:var(--card-shadow);"></div>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--subtext);font-weight:600;word-break:break-all;" id="qr-url"></p>
+    <div style="height:20px"></div>
+    <button class="btn btn-primary" onclick="closeModal('modal-qr')">Close</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL: PASSWORD LOCK (18+)                 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-password" onclick="closeModal('modal-password')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-title">🔒 Adult Category</div>
+    <p style="text-align:center;font-size:13px;color:var(--subtext);font-weight:600;margin-bottom:20px;">This category is password protected.<br>Enter the password to unlock it.</p>
+    <input type="password" id="password-input" placeholder="Enter password…" style="width:100%;padding:14px 18px;border-radius:50px;border:2.5px solid var(--primary-light);font-family:var(--font-main);font-size:15px;font-weight:600;color:var(--text);outline:none;margin-bottom:8px;" autocomplete="off">
+    <p class="error-msg" id="password-error" style="text-align:center;margin-bottom:12px;"></p>
+    <button class="btn btn-primary" onclick="submitPassword()">🔓 Unlock</button>
+    <div style="height:12px"></div>
+    <button class="btn btn-outline" onclick="closeModal('modal-password')">Cancel</button>
+    <div style="height:8px"></div>
+    <p class="faded text-center">Default password: <b style="color:var(--primary)">testicles</b></p>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -809,6 +857,33 @@
   <div id="player-list" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:420px;"></div>
   <div style="height:12px"></div>
   <p class="faded text-center" id="player-count-hint">minimum 3 players required</p>
+  <div id="thug-count-wrap" style="display:none;width:100%;max-width:420px;">
+    <div style="height:16px"></div>
+    <div style="background:#fff;border-radius:var(--radius);padding:16px 20px;box-shadow:0 2px 8px rgba(107,63,160,0.08);">
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;text-align:center;">🕵️ How many धितो ठगs?</p>
+      <div style="display:flex;gap:10px;">
+        <button id="thug-btn-1" onclick="setThugCount(1)" style="
+          flex:1;padding:12px;border-radius:var(--radius-sm);border:2.5px solid var(--primary);
+          background:var(--primary);color:#fff;font-family:var(--font-main);font-weight:800;
+          font-size:15px;cursor:pointer;transition:all 0.18s;">
+          1 ठग
+        </button>
+        <button id="thug-btn-2" onclick="setThugCount(2)" style="
+          flex:1;padding:12px;border-radius:var(--radius-sm);border:2.5px solid var(--primary-light);
+          background:#fff;color:var(--primary);font-family:var(--font-main);font-weight:800;
+          font-size:15px;cursor:pointer;transition:all 0.18s;">
+          2 ठगs
+        </button>
+        <button id="thug-btn-r" onclick="setThugCount('random')" style="
+          flex:1;padding:12px;border-radius:var(--radius-sm);border:2.5px solid var(--primary-light);
+          background:#fff;color:var(--primary);font-family:var(--font-main);font-weight:800;
+          font-size:15px;cursor:pointer;transition:all 0.18s;">
+          🎲
+        </button>
+      </div>
+      <p class="faded text-center" style="margin-top:8px;" id="thug-count-hint">1 ठग selected</p>
+    </div>
+  </div>
   <div style="height:24px"></div>
   <button class="btn btn-primary" id="start-btn" onclick="goToCategory()" disabled>🚀 Start the Game!</button>
 </div>
@@ -993,8 +1068,6 @@
     <div style="height:8px"></div>
     <p class="error-msg" id="guess-error"></p>
   </div>
-  <div style="height:20px"></div>
-  <p class="faded text-center">Hint: it's an Australian mortgage term 😉</p>
   <div style="height:12px"></div>
   <button class="btn btn-outline" onclick="backToSetup()" style="opacity:0.6;font-size:13px;">← Back to Add Players</button>
 </div>
@@ -1041,13 +1114,22 @@
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-title">📖 How to Play<br><span style="font-size:14px;font-weight:600;color:var(--subtext)">कसरी खेल्ने?</span></div>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text">Add all players in <b>clockwise order</b>. Minimum 3 players required.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">Choose one of <b>6 mortgage categories</b>. A secret word is randomly picked from it.</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text"><b>Pass the phone</b> to each player. Drag the pink card to see your role. One player will be the <b>धितो ठग</b> (Mortgage Thug) — they don't see the word.</div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-text">Go around the circle. Each player says <b>one vague word clue</b> about the secret word. The ठग tries to guess it from the clues.</div></div>
-      <div class="step"><div class="step-num">5</div><div class="step-text"><b>Discuss & vote</b> for who you think is the ठग. Majority vote decides.</div></div>
-      <div class="step"><div class="step-num">6</div><div class="step-text">If caught, the ठग gets <b>one chance to guess</b> the secret word. Guess correctly = ठग wins!</div></div>
-      <div class="step"><div class="step-num">7</div><div class="step-text">If the ठग is <b>NOT caught</b>, the ठग wins. Otherwise, the team wins!</div></div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Add all players in <b>clockwise order</b> — minimum 3 players. Drag ☰ to reorder. With <b>6+ players</b>, choose <b>1 or 2 ठगs</b> at the bottom of this page.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Choose one or more of the <b>23 categories</b>. A secret word is randomly picked from the combined pool. Some categories (🔞) are <b>password protected</b>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><b>Pass the phone</b> to each player. Drag the pink card to reveal your role. The <b>धितो ठग</b> (Mortgage Thug) sees only their role — not the secret word. With 6+ players, there may be <b>2 ठगs</b> who don't know each other!</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">The first player is randomly selected. Go <b>clockwise</b> around the circle — each player says <b>one vague word clue</b>. The ठग tries to figure out the secret word from the clues.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text"><b>Discuss & vote</b> for who you think is the धितो ठग. The player with the most votes is caught.</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-text">If caught, the ठग gets <b>one chance to guess</b> the secret word. Guess correctly = ठग still wins!</div></div>
+      <div class="step"><div class="step-num">7</div><div class="step-text">If the ठग is <b>NOT caught</b>, the ठग wins. If caught and wrong guess, the <b>team wins!</b></div></div>
+      <div class="step"><div class="step-num">8</div><div class="step-text">The <b>first non-ठग player</b> to reveal their role can tap <b>🔄 Reset Word</b> to pick a different secret word before passing the phone.</div></div>
+    </div>
+    <div style="height:16px"></div>
+    <div style="background:#f0e8ff;border-radius:var(--radius-sm);padding:12px 16px;">
+      <p style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px;">🏆 How to win</p>
+      <p style="font-size:12px;font-weight:600;color:var(--subtext);line-height:1.5;">
+        <b style="color:var(--primary)">ठग wins</b> by not getting caught OR by guessing the secret word after being caught.<br>
+        <b style="color:var(--primary)">Team wins</b> by correctly identifying and catching the ठग.
+      </p>
     </div>
     <div style="height:20px"></div>
     <button class="btn btn-primary" onclick="closeModal('modal-howtoplay')">Got it! 👍</button>
@@ -2111,11 +2193,14 @@ let state = {
   selectedCategory: null,
   selectedWord: null,
   thugIndex: null,
+  thugIndices: [], // supports multiple thugs
   lastThugIndex: null,
   thugQueue: [],
   currentRevealIndex: 0,
   firstPlayerIndex: 0,
   firstNonThugSeen: false,
+  usedWords: [], // track used words to prevent repeats
+  numThugs: 1,  // 1 or 2, chosen by host on setup screen
   round: 1,
   voteTarget: null,
   revealed: false,
@@ -2238,6 +2323,13 @@ function renderChips() {
     n < 3 ? `${n} added — need ${3-n} more` :
     `${n} players ready ✓ — drag ☰ to reorder`;
 
+  // Show/hide thug count toggle for 6+ players
+  const wrap = document.getElementById('thug-count-wrap');
+  if (wrap) {
+    wrap.style.display = n >= 6 ? 'block' : 'none';
+    if (n < 6) state.numThugs = 1; // reset to 1 if below threshold
+    updateThugCountUI();
+  }
   initDragToReorder();
 }
 
@@ -2359,6 +2451,37 @@ function initDragToReorder() {
   document.addEventListener('touchend', onDragEnd);
 }
 
+function setThugCount(n) {
+  state.numThugs = n; // 1, 2, or 'random'
+  updateThugCountUI();
+}
+
+function updateThugCountUI() {
+  const btn1 = document.getElementById('thug-btn-1');
+  const btn2 = document.getElementById('thug-btn-2');
+  const btnR = document.getElementById('thug-btn-r');
+  const hint = document.getElementById('thug-count-hint');
+  if (!btn1 || !btn2 || !btnR) return;
+
+  // Reset all to unselected
+  [btn1, btn2, btnR].forEach(b => {
+    b.style.background = '#fff';
+    b.style.color = 'var(--primary)';
+    b.style.borderColor = 'var(--primary-light)';
+  });
+
+  if (state.numThugs === 1) {
+    btn1.style.background = 'var(--primary)'; btn1.style.color = '#fff'; btn1.style.borderColor = 'var(--primary)';
+    if (hint) hint.textContent = '1 ठग selected';
+  } else if (state.numThugs === 2) {
+    btn2.style.background = 'var(--primary)'; btn2.style.color = '#fff'; btn2.style.borderColor = 'var(--primary)';
+    if (hint) hint.textContent = '2 ठगs selected — harder for the team!';
+  } else {
+    btnR.style.background = 'var(--primary)'; btnR.style.color = '#fff'; btnR.style.borderColor = 'var(--primary)';
+    if (hint) hint.textContent = '🎲 Random — nobody knows until the end!';
+  }
+}
+
 function updateStartBtn() {
   document.getElementById('start-btn').disabled = state.players.length < 3;
 }
@@ -2368,21 +2491,56 @@ function shake(el) {
   el.addEventListener('animationend', () => el.style.animation = '', { once: true });
 }
 
+// ── LOCKED CATEGORIES (password protected) ──
+const LOCKED_CATEGORIES = { 'over-21': true }; // id of password-protected categories
+const CATEGORY_PASSWORD = 'testicles';
+let unlockedCategories = {};
+let pendingLockIdx = null;
+
 // ── CATEGORY SCREEN ──
 function renderCategoryGrid() {
   const grid = document.getElementById('cat-grid');
-  grid.innerHTML = CATEGORIES.map((c, i) => `
-    <div class="cat-tile" data-idx="${i}" onclick="selectCategory(${i})">
+  grid.innerHTML = CATEGORIES.map((c, i) => {
+    const isLocked = LOCKED_CATEGORIES[c.id] && !unlockedCategories[c.id];
+    return `
+    <div class="cat-tile ${isLocked ? 'locked-tile' : ''}" data-idx="${i}" onclick="${isLocked ? `attemptUnlock(${i})` : `selectCategory(${i})`}">
       <span class="cat-icon">${c.icon}</span>
-      ${c.name}<br>
+      ${c.name}${isLocked ? ' 🔒' : ''}<br>
       <span style="color:var(--primary-light);font-size:11px">${c.nepali}</span>
       <span class="cat-check" id="cat-check-${i}" style="display:none;margin-top:4px;font-size:16px;">✅</span>
     </div>
-  `).join('');
-  // Show total category count in subtitle
+  `}).join('');
   const sub = document.getElementById('cat-screen-sub');
   if (sub) sub.textContent = `${CATEGORIES.length} categories — pick one or more, word drawn from combined pool`;
 }
+
+function attemptUnlock(idx) {
+  pendingLockIdx = idx;
+  document.getElementById('password-input').value = '';
+  document.getElementById('password-error').textContent = '';
+  document.getElementById('modal-password').classList.add('open');
+}
+
+function submitPassword() {
+  const val = document.getElementById('password-input').value;
+  if (val === CATEGORY_PASSWORD) {
+    if (pendingLockIdx !== null) {
+      const cat = CATEGORIES[pendingLockIdx];
+      unlockedCategories[cat.id] = true;
+      closeModal('modal-password');
+      renderCategoryGrid();
+      selectCategory(pendingLockIdx);
+      pendingLockIdx = null;
+    }
+  } else {
+    document.getElementById('password-error').textContent = 'Wrong password!';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const pinInput = document.getElementById('password-input');
+  if (pinInput) pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitPassword(); });
+});
 
 function selectCategory(idx) {
   const i = state.selectedCategories.indexOf(idx);
@@ -2410,23 +2568,35 @@ function selectCategory(idx) {
 }
 
 function pickRandomCategory() {
-  // Pick a random category silently and immediately start the game
   const idx = Math.floor(Math.random() * CATEGORIES.length);
   state.selectedCategories = [idx];
-
   const combinedWords = CATEGORIES[idx].words;
-  state.selectedWord = combinedWords[Math.floor(Math.random() * combinedWords.length)];
+  const available = combinedWords.filter(w => !state.usedWords.includes(w));
+  const pool = available.length > 0 ? available : combinedWords;
+  state.selectedWord = pool[Math.floor(Math.random() * pool.length)];
+  state.usedWords.push(state.selectedWord);
+  if (state.usedWords.length > 10) state.usedWords.shift();
   state.selectedCategory = idx;
-  state.thugIndex = pickThug();
-  state.lastThugIndex = state.thugIndex;
+
+  const numThugs = state.numThugs === 'random' ? (Math.random() < 0.5 ? 2 : 1) : (state.numThugs || 1);
+  state.thugIndices = [];
+  const picked = new Set();
+  for (let t = 0; t < numThugs; t++) {
+    let tidx = pickThug();
+    let attempts = 0;
+    while (picked.has(tidx) && attempts < state.players.length) { state.thugQueue = []; tidx = pickThug(); attempts++; }
+    picked.add(tidx);
+    state.thugIndices.push(tidx);
+  }
+  state.thugIndex = state.thugIndices[0];
+  state.lastThugIndex = state.thugIndices[0];
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
   state.voteTarget = null;
 
-  // Go straight to dealing — don't show which category was picked
   showScreen('screen-dealing');
-  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players`;
+  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players${numThugs > 1 ? ' • 2 Thugs!' : ''}`;
   setTimeout(() => startReveal(), 1800);
 }
 
@@ -2463,6 +2633,7 @@ function backToSetup() {
   state.thugIndex = null;
   state.lastThugIndex = null;
   state.thugQueue = [];
+  state.numThugs = 1;
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
@@ -2485,26 +2656,47 @@ function goToCategory() {
 
 function confirmCategory() {
   if (state.selectedCategories.length === 0) return;
-  // Merge word pools from all selected categories
   const combinedWords = state.selectedCategories.flatMap(idx => CATEGORIES[idx].words);
-  state.selectedWord = combinedWords[Math.floor(Math.random() * combinedWords.length)];
-  // Store which category the chosen word belongs to (for display)
+
+  // Prevent same word repeat — exclude recently used words
+  const available = combinedWords.filter(w => !state.usedWords.includes(w));
+  const pool = available.length > 0 ? available : combinedWords;
+  state.selectedWord = pool[Math.floor(Math.random() * pool.length)];
+  // Track used word (keep last 10)
+  state.usedWords.push(state.selectedWord);
+  if (state.usedWords.length > 10) state.usedWords.shift();
+
   state.selectedCategory = state.selectedCategories.find(idx =>
     CATEGORIES[idx].words.includes(state.selectedWord)
   ) ?? state.selectedCategories[0];
-  state.thugIndex = pickThug();
-  state.lastThugIndex = state.thugIndex;
+
+  // Use host-selected thug count — resolve 'random' at game start
+  const numThugs = state.numThugs === 'random' ? (Math.random() < 0.5 ? 2 : 1) : (state.numThugs || 1);
+  state.thugIndices = [];
+  const picked = new Set();
+  for (let t = 0; t < numThugs; t++) {
+    let idx = pickThug();
+    // Ensure no duplicate thugs
+    let attempts = 0;
+    while (picked.has(idx) && attempts < state.players.length) {
+      state.thugQueue = []; // force reshuffle
+      idx = pickThug();
+      attempts++;
+    }
+    picked.add(idx);
+    state.thugIndices.push(idx);
+  }
+  state.thugIndex = state.thugIndices[0]; // backward compat
+  state.lastThugIndex = state.thugIndices[0];
+
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
   state.voteTarget = null;
 
-  // Dealing animation
   showScreen('screen-dealing');
-  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players`;
-  setTimeout(() => {
-    startReveal();
-  }, 1800);
+  document.getElementById('dealing-round-text').textContent = `Round ${state.round} • ${state.players.length} players${numThugs > 1 ? ' • 2 Thugs!' : ''}`;
+  setTimeout(() => startReveal(), 1800);
 }
 
 // ── REVEAL SCREEN ──
@@ -2515,7 +2707,7 @@ function startReveal() {
 
 function showRevealFor(idx) {
   const player = state.players[idx];
-  const isThug = idx === state.thugIndex;
+  const isThug = state.thugIndices.includes(idx);
   const cat = CATEGORIES[state.selectedCategory];
 
   document.getElementById('reveal-player-name').textContent = player;
@@ -2742,16 +2934,15 @@ function submitVote() {
     return;
   }
   const votedIdx = state.voteTarget;
-  const isThugCaught = votedIdx === state.thugIndex;
+  const isThugCaught = state.thugIndices.includes(votedIdx);
 
   if (isThugCaught) {
-    // Thug gets a chance to guess
-    document.getElementById('guess-category-name').textContent = CATEGORIES[state.selectedCategory].name;
+    const cat = CATEGORIES[state.selectedCategory];
+    document.getElementById('guess-category-name').textContent = cat.name;
     document.getElementById('thug-guess-input').value = '';
     document.getElementById('guess-error').textContent = '';
     showScreen('screen-thug-guess');
   } else {
-    // Thug escapes
     showResult(false, false, votedIdx);
   }
 }
@@ -2769,22 +2960,26 @@ function submitThugGuess() {
 // ── RESULT SCREEN ──
 function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
   const cat = CATEGORIES[state.selectedCategory];
-  const thugName = state.players[state.thugIndex];
+  const thugNames = state.thugIndices.map(i => state.players[i]).join(' & ');
   const votedName = state.players[votedIdx];
+  const multiThug = state.thugIndices.length > 1;
 
   let emoji, title, sub, bannerClass;
 
   if (!thugCaught) {
-    // Thug wins - not caught
-    emoji = '🎭'; title = 'धितो ठग Escapes!'; sub = `${escHtml(thugName)} was the Mortgage Thug and was NOT caught!`;
+    emoji = '🎭';
+    title = multiThug ? 'धितो ठगs Escape!' : 'धितो ठग Escapes!';
+    sub = `${escHtml(thugNames)} ${multiThug ? 'were' : 'was'} the Mortgage Thug${multiThug ? 's' : ''} and ${multiThug ? 'were' : 'was'} NOT caught!`;
     bannerClass = 'result-win';
   } else if (thugCaught && thugGuessedCorrect) {
-    // Thug caught but guessed correctly
-    emoji = '🕵️'; title = 'ठग Won by Guessing!'; sub = `Caught but guessed the word correctly — ${escHtml(thugName)} wins!`;
+    emoji = '🕵️';
+    title = 'ठग Won by Guessing!';
+    sub = `Caught but guessed the word correctly — ${escHtml(thugNames)} wins!`;
     bannerClass = 'result-win';
   } else {
-    // Team wins
-    emoji = '🎉'; title = 'Team Wins!'; sub = `${escHtml(thugName)} was the Mortgage Thug and got caught!`;
+    emoji = '🎉';
+    title = 'Team Wins!';
+    sub = `${escHtml(thugNames)} was the Mortgage Thug and got caught!`;
     bannerClass = 'result-lose';
   }
 
@@ -2793,7 +2988,7 @@ function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
   document.getElementById('result-sub').textContent = sub;
   document.getElementById('result-banner').className = `result-banner ${bannerClass}`;
   document.getElementById('result-word').textContent = state.selectedWord;
-  document.getElementById('result-thug').textContent = thugName;
+  document.getElementById('result-thug').textContent = thugNames;
   document.getElementById('result-cat').textContent = cat.name;
   document.getElementById('result-voted').textContent = votedName;
 
@@ -2802,12 +2997,12 @@ function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
 
 // ── PLAY AGAIN ──
 function playAgain() {
-  // Keep same players, go to category
   state.selectedCategories = [];
   state.selectedCategory = null;
   state.firstNonThugSeen = false;
   state.selectedWord = null;
   state.thugIndex = null;
+  state.thugIndices = [];
   state.currentRevealIndex = 0;
   state.firstPlayerIndex = 0;
   state.round++;
@@ -2830,6 +3025,21 @@ function escHtml(s) {
 }
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+// ── QR CODE ──
+function showQR() {
+  const url = 'https://rabinexpresso.github.io/mortgage-thug-mvp/';
+  document.getElementById('qr-url').textContent = url;
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  // Use Google Charts QR API
+  const img = document.createElement('img');
+  img.src = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+  img.alt = 'QR Code';
+  img.style.cssText = 'width:200px;height:200px;display:block;border-radius:8px;';
+  container.appendChild(img);
+  document.getElementById('modal-qr').classList.add('open');
 }
 
 // ── AUTO-UPDATE CHECKER ──
