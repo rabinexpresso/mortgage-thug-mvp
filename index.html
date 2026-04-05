@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-05T17:06:38">
+<meta name="build-time" content="2026-04-05T17:16:43">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -2232,7 +2232,8 @@ let state = {
   numThugs: 1,  // 1, 2, or 'random' — chosen by host
   resolvedNumThugs: 1, // actual resolved count after random is decided
   voteTargets: [], // array to support up to 2 votes
-  caughtThugIdx: null, // index of the thug who was caught by vote
+  caughtThugIdx: null,
+  caughtThugIndices: [],
   round: 1,
   voteTarget: null,
   revealed: false,
@@ -2992,7 +2993,7 @@ function submitVote() {
   const isThugCaught = caughtThugIndices.length > 0;
   const votedIdx = state.voteTargets[0];
   state.voteTarget = votedIdx;
-  state.caughtThugIdx = isThugCaught ? caughtThugIndices[0] : null; // store the caught thug
+  state.caughtThugIndices = caughtThugIndices; // store ALL caught thugs
 
   if (isThugCaught) {
     const cat = CATEGORIES[state.selectedCategory];
@@ -3012,7 +3013,7 @@ function submitThugGuess() {
     return;
   }
   const correct = guess.toLowerCase() === state.selectedWord.toLowerCase();
-  showResult(true, correct, state.caughtThugIdx ?? state.voteTarget);
+  showResult(true, correct, state.voteTarget);
 }
 
 // ── RESULT SCREEN ──
@@ -3022,11 +3023,13 @@ function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
   const allThugNames = state.thugIndices.map(i => state.players[i]).join(' & ');
   const multiThug = state.thugIndices.length > 1;
 
-  // Work out escaped thugs (those not caught)
-  const caughtIdx = state.caughtThugIdx;
-  const escapedThugs = state.thugIndices.filter(i => i !== caughtIdx).map(i => state.players[i]);
-  const caughtName = caughtIdx !== null && caughtIdx !== undefined ? state.players[caughtIdx] : allThugNames;
-  const partialCatch = thugCaught && multiThug && escapedThugs.length > 0;
+  // Caught vs escaped thugs
+  const caught = state.caughtThugIndices || [];
+  const escaped = state.thugIndices.filter(i => !caught.includes(i));
+  const caughtNames = caught.map(i => state.players[i]).join(' & ');
+  const escapedNames = escaped.map(i => state.players[i]).join(' & ');
+  const allCaught = escaped.length === 0; // true when ALL thugs were caught
+  const partialCatch = thugCaught && multiThug && !allCaught; // only 1 of 2 caught
 
   let emoji, title, sub, bannerClass;
 
@@ -3036,23 +3039,25 @@ function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
     title = multiThug ? 'धितो ठगs Escape!' : 'धितो ठग Escapes!';
     sub = `${allThugNames} ${multiThug ? 'were' : 'was'} the Mortgage Thug${multiThug ? 's' : ''} and ${multiThug ? 'were' : 'was'} NOT caught!`;
     bannerClass = 'result-win';
-  } else if (thugCaught && thugGuessedCorrect) {
-    // Caught but guessed correctly
-    emoji = '🕵️';
-    if (partialCatch) {
-      title = `${caughtName} Guessed Right — but ${escapedThugs.join(' & ')} Escaped!`;
-      sub = `${caughtName} was caught but guessed the word correctly. ${escapedThugs.join(' & ')} was never caught — it's a draw!`;
+  } else if (partialCatch) {
+    if (thugGuessedCorrect) {
+      // 1 caught but guessed right, 1 escaped
+      emoji = '🕵️';
+      title = 'Split Result!';
+      sub = `${caughtNames} was caught but guessed the word — and ${escapedNames} escaped! ठग team survives.`;
       bannerClass = 'result-win';
     } else {
-      title = 'ठग Won by Guessing!';
-      sub = `Caught but guessed the word correctly — ${caughtName} wins!`;
+      // 1 caught wrong guess, 1 escaped
+      emoji = '⚖️';
+      title = 'Split Result!';
+      sub = `${caughtNames} was caught. But ${escapedNames} escaped — the ठग team survives!`;
       bannerClass = 'result-win';
     }
-  } else if (partialCatch) {
-    // 1 caught, 1 escaped, wrong guess
-    emoji = '⚖️';
-    title = 'Split Result!';
-    sub = `${caughtName} was caught. But ${escapedThugs.join(' & ')} escaped — the ठग team survives!`;
+  } else if (thugCaught && thugGuessedCorrect) {
+    // All caught but guessed correctly
+    emoji = '🕵️';
+    title = 'ठग Won by Guessing!';
+    sub = `Caught but guessed the word correctly — ${caughtNames} wins!`;
     bannerClass = 'result-win';
   } else {
     // All caught, wrong guess — team wins
@@ -3088,6 +3093,7 @@ function playAgain() {
   state.voteTarget = null;
   state.voteTargets = [];
   state.caughtThugIdx = null;
+  state.caughtThugIndices = [];
   document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('selected'));
   document.getElementById('cat-confirm-btn').disabled = true;
   showScreen('screen-category');
