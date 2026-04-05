@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-05T16:32:24">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="build-time" content="2026-04-05T16:38:09">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -796,6 +795,8 @@
   <button class="btn btn-outline" onclick="showQR()">📱 Share QR Code</button>
   <div style="height:12px"></div>
   <button class="btn btn-outline" id="install-btn" onclick="installPWA()" style="display:none;">⬇️ Install App</button>
+  <div style="height:12px"></div>
+  <button class="btn btn-outline" id="ios-install-btn" onclick="showiOSInstall()" style="display:none;">📲 Add to Home Screen</button>
   <div style="height:20px"></div>
   <div class="brand-strip">🏠 Alaya · Home Loan Experts · धितो ठग</div>
 </div>
@@ -817,8 +818,34 @@
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
-<!-- MODAL: PASSWORD LOCK (18+)                 -->
+<!-- MODAL: IOS INSTALL GUIDE                  -->
 <!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-ios-install" onclick="closeModal('modal-ios-install')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-title">📲 Add to Home Screen</div>
+    <p style="text-align:center;font-size:13px;color:var(--subtext);font-weight:600;margin-bottom:20px;">Install धितो ठग as an app on your iPhone</p>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:14px;background:#f8f4ff;border-radius:var(--radius-sm);padding:12px 14px;">
+        <div style="font-size:28px;flex-shrink:0;">1️⃣</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Tap the <b>Share button</b> <span style="font-size:16px;">⬆️</span> at the bottom of your Safari browser</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#f8f4ff;border-radius:var(--radius-sm);padding:12px 14px;">
+        <div style="font-size:28px;flex-shrink:0;">2️⃣</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Scroll down in the Share menu and tap <b>"Add to Home Screen"</b></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#f8f4ff;border-radius:var(--radius-sm);padding:12px 14px;">
+        <div style="font-size:28px;flex-shrink:0;">3️⃣</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Tap <b>Add</b> in the top right corner</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#f0e8ff;border-radius:var(--radius-sm);padding:12px 14px;">
+        <div style="font-size:28px;flex-shrink:0;">🕵️</div>
+        <div style="font-size:13px;font-weight:600;color:var(--primary);">धितो ठग icon will appear on your home screen!</div>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+    <button class="btn btn-primary" onclick="closeModal('modal-ios-install')">Got it! 👍</button>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-password" onclick="closeModal('modal-password')">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-title">🔒 Adult Category</div>
@@ -3064,12 +3091,26 @@ function showQR() {
 
 // ── PWA INSTALL PROMPT ──
 let deferredInstallPrompt = null;
+
+// Detect iOS Safari
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+const isInStandaloneMode = window.navigator.standalone === true;
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Show iOS install guide button on Safari iPhone (not already installed)
+  if (isIOS && !isInStandaloneMode) {
+    const btn = document.getElementById('ios-install-btn');
+    if (btn) btn.style.display = 'flex';
+  }
+});
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
   const btn = document.getElementById('install-btn');
   if (btn) btn.style.display = 'flex';
 });
+
 function installPWA() {
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
@@ -3080,9 +3121,16 @@ function installPWA() {
     });
   }
 }
+
+function showiOSInstall() {
+  document.getElementById('modal-ios-install').classList.add('open');
+}
+
 window.addEventListener('appinstalled', () => {
   const btn = document.getElementById('install-btn');
   if (btn) btn.style.display = 'none';
+  const iosBtn = document.getElementById('ios-install-btn');
+  if (iosBtn) iosBtn.style.display = 'none';
 });
 
 // ── AUTO-UPDATE CHECKER ──
