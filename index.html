@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-05T16:53:13">
+<meta name="build-time" content="2026-04-05T17:06:38">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -2232,6 +2232,7 @@ let state = {
   numThugs: 1,  // 1, 2, or 'random' — chosen by host
   resolvedNumThugs: 1, // actual resolved count after random is decided
   voteTargets: [], // array to support up to 2 votes
+  caughtThugIdx: null, // index of the thug who was caught by vote
   round: 1,
   voteTarget: null,
   revealed: false,
@@ -2986,10 +2987,12 @@ function submitVote() {
     document.getElementById('vote-error').textContent = 'Please select someone to vote for!';
     return;
   }
-  const caughtThugs = state.voteTargets.filter(idx => state.thugIndices.includes(idx));
-  const isThugCaught = caughtThugs.length > 0;
+  // Find which voted players are actually thugs
+  const caughtThugIndices = state.voteTargets.filter(idx => state.thugIndices.includes(idx));
+  const isThugCaught = caughtThugIndices.length > 0;
   const votedIdx = state.voteTargets[0];
   state.voteTarget = votedIdx;
+  state.caughtThugIdx = isThugCaught ? caughtThugIndices[0] : null; // store the caught thug
 
   if (isThugCaught) {
     const cat = CATEGORIES[state.selectedCategory];
@@ -3009,32 +3012,53 @@ function submitThugGuess() {
     return;
   }
   const correct = guess.toLowerCase() === state.selectedWord.toLowerCase();
-  showResult(true, correct, state.voteTarget);
+  showResult(true, correct, state.caughtThugIdx ?? state.voteTarget);
 }
 
 // ── RESULT SCREEN ──
 function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
   const cat = CATEGORIES[state.selectedCategory];
-  const thugNames = state.thugIndices.map(i => state.players[i]).join(' & ');
   const votedName = state.players[votedIdx];
+  const allThugNames = state.thugIndices.map(i => state.players[i]).join(' & ');
   const multiThug = state.thugIndices.length > 1;
+
+  // Work out escaped thugs (those not caught)
+  const caughtIdx = state.caughtThugIdx;
+  const escapedThugs = state.thugIndices.filter(i => i !== caughtIdx).map(i => state.players[i]);
+  const caughtName = caughtIdx !== null && caughtIdx !== undefined ? state.players[caughtIdx] : allThugNames;
+  const partialCatch = thugCaught && multiThug && escapedThugs.length > 0;
 
   let emoji, title, sub, bannerClass;
 
   if (!thugCaught) {
+    // Nobody caught
     emoji = '🎭';
     title = multiThug ? 'धितो ठगs Escape!' : 'धितो ठग Escapes!';
-    sub = `${escHtml(thugNames)} ${multiThug ? 'were' : 'was'} the Mortgage Thug${multiThug ? 's' : ''} and ${multiThug ? 'were' : 'was'} NOT caught!`;
+    sub = `${allThugNames} ${multiThug ? 'were' : 'was'} the Mortgage Thug${multiThug ? 's' : ''} and ${multiThug ? 'were' : 'was'} NOT caught!`;
     bannerClass = 'result-win';
   } else if (thugCaught && thugGuessedCorrect) {
+    // Caught but guessed correctly
     emoji = '🕵️';
-    title = 'ठग Won by Guessing!';
-    sub = `Caught but guessed the word correctly — ${escHtml(thugNames)} wins!`;
+    if (partialCatch) {
+      title = `${caughtName} Guessed Right — but ${escapedThugs.join(' & ')} Escaped!`;
+      sub = `${caughtName} was caught but guessed the word correctly. ${escapedThugs.join(' & ')} was never caught — it's a draw!`;
+      bannerClass = 'result-win';
+    } else {
+      title = 'ठग Won by Guessing!';
+      sub = `Caught but guessed the word correctly — ${caughtName} wins!`;
+      bannerClass = 'result-win';
+    }
+  } else if (partialCatch) {
+    // 1 caught, 1 escaped, wrong guess
+    emoji = '⚖️';
+    title = 'Split Result!';
+    sub = `${caughtName} was caught. But ${escapedThugs.join(' & ')} escaped — the ठग team survives!`;
     bannerClass = 'result-win';
   } else {
+    // All caught, wrong guess — team wins
     emoji = '🎉';
     title = 'Team Wins!';
-    sub = `${escHtml(thugNames)} was the Mortgage Thug and got caught!`;
+    sub = `${allThugNames} ${multiThug ? 'were' : 'was'} the Mortgage Thug${multiThug ? 's' : ''} and got caught!`;
     bannerClass = 'result-lose';
   }
 
@@ -3043,7 +3067,7 @@ function showResult(thugCaught, thugGuessedCorrect, votedIdx) {
   document.getElementById('result-sub').textContent = sub;
   document.getElementById('result-banner').className = `result-banner ${bannerClass}`;
   document.getElementById('result-word').textContent = state.selectedWord;
-  document.getElementById('result-thug').textContent = thugNames;
+  document.getElementById('result-thug').textContent = allThugNames;
   document.getElementById('result-cat').textContent = cat.name;
   document.getElementById('result-voted').textContent = votedName;
 
@@ -3063,6 +3087,7 @@ function playAgain() {
   state.round++;
   state.voteTarget = null;
   state.voteTargets = [];
+  state.caughtThugIdx = null;
   document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('selected'));
   document.getElementById('cat-confirm-btn').disabled = true;
   showScreen('screen-category');
