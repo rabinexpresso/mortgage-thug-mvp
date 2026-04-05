@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-05T16:38:09">
+<meta name="build-time" content="2026-04-05T16:53:13">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -1063,7 +1063,7 @@
   <div class="round-badge" id="vote-round-badge">Round 1</div>
   <div style="height:16px"></div>
   <p class="section-title text-center">Who is the धितो ठग?</p>
-  <p class="section-sub text-center">Vote for who you think is the Mortgage Thug</p>
+  <p class="section-sub text-center" id="vote-sub-text">Vote for who you think is the Mortgage Thug</p>
   <div style="height:16px"></div>
   <div class="vote-list" id="vote-list"></div>
   <div style="height:8px"></div>
@@ -2229,7 +2229,9 @@ let state = {
   firstPlayerIndex: 0,
   firstNonThugSeen: false,
   usedWords: [], // track used words to prevent repeats
-  numThugs: 1,  // 1 or 2, chosen by host on setup screen
+  numThugs: 1,  // 1, 2, or 'random' — chosen by host
+  resolvedNumThugs: 1, // actual resolved count after random is decided
+  voteTargets: [], // array to support up to 2 votes
   round: 1,
   voteTarget: null,
   revealed: false,
@@ -2608,6 +2610,7 @@ function pickRandomCategory() {
   state.selectedCategory = idx;
 
   const numThugs = state.numThugs === 'random' ? (Math.random() < 0.5 ? 2 : 1) : (state.numThugs || 1);
+  state.resolvedNumThugs = numThugs;
   state.thugIndices = [];
   const picked = new Set();
   for (let t = 0; t < numThugs; t++) {
@@ -2663,6 +2666,7 @@ function backToSetup() {
   state.lastThugIndex = null;
   state.thugQueue = [];
   state.numThugs = 1;
+  state.resolvedNumThugs = 1;
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
@@ -2699,8 +2703,9 @@ function confirmCategory() {
     CATEGORIES[idx].words.includes(state.selectedWord)
   ) ?? state.selectedCategories[0];
 
-  // Use host-selected thug count — resolve 'random' at game start
+  // Use host-selected thug count — resolve 'random' at game start and store it
   const numThugs = state.numThugs === 'random' ? (Math.random() < 0.5 ? 2 : 1) : (state.numThugs || 1);
+  state.resolvedNumThugs = numThugs; // store resolved count for voting
   state.thugIndices = [];
   const picked = new Set();
   for (let t = 0; t < numThugs; t++) {
@@ -2928,7 +2933,7 @@ function showGameScreen() {
 // ── VOTE SCREEN ──
 function showVoteScreen() {
   document.getElementById('vote-round-badge').textContent = `Round ${state.round}`;
-  state.voteTarget = null;
+  state.voteTargets = [];
   const list = document.getElementById('vote-list');
   list.innerHTML = state.players.map((p, i) => `
     <div class="vote-item" id="vote-${i}" onclick="selectVote(${i})">
@@ -2939,6 +2944,16 @@ function showVoteScreen() {
       <span class="vote-check">✅</span>
     </div>
   `).join('');
+  const subEl = document.getElementById('vote-sub-text');
+  if (subEl) {
+    if (state.numThugs === 'random') {
+      subEl.innerHTML = `Select up to <b>2 suspects</b> — nobody knows how many ठगs!`;
+    } else if (state.numThugs === 2) {
+      subEl.innerHTML = `Select up to <b>2 suspects</b> — there are 2 ठगs!`;
+    } else {
+      subEl.innerHTML = `Select <b>1 suspect</b> — vote wisely!`;
+    }
+  }
   document.getElementById('vote-error').textContent = '';
   showScreen('screen-vote');
 }
@@ -2950,20 +2965,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function selectVote(idx) {
-  state.voteTarget = idx;
+  const maxVotes = (state.numThugs === 'random' || state.numThugs === 2) ? 2 : 1;
+  const pos = state.voteTargets.indexOf(idx);
+  if (pos !== -1) {
+    state.voteTargets.splice(pos, 1);
+  } else if (state.voteTargets.length < maxVotes) {
+    state.voteTargets.push(idx);
+  } else {
+    state.voteTargets.shift();
+    state.voteTargets.push(idx);
+  }
   document.querySelectorAll('.vote-item').forEach((el, i) => {
-    el.classList.toggle('selected', i === idx);
+    el.classList.toggle('selected', state.voteTargets.includes(i));
   });
   document.getElementById('vote-error').textContent = '';
 }
 
 function submitVote() {
-  if (state.voteTarget === null) {
+  if (!state.voteTargets || state.voteTargets.length === 0) {
     document.getElementById('vote-error').textContent = 'Please select someone to vote for!';
     return;
   }
-  const votedIdx = state.voteTarget;
-  const isThugCaught = state.thugIndices.includes(votedIdx);
+  const caughtThugs = state.voteTargets.filter(idx => state.thugIndices.includes(idx));
+  const isThugCaught = caughtThugs.length > 0;
+  const votedIdx = state.voteTargets[0];
+  state.voteTarget = votedIdx;
 
   if (isThugCaught) {
     const cat = CATEGORIES[state.selectedCategory];
@@ -3036,6 +3062,7 @@ function playAgain() {
   state.firstPlayerIndex = 0;
   state.round++;
   state.voteTarget = null;
+  state.voteTargets = [];
   document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('selected'));
   document.getElementById('cat-confirm-btn').disabled = true;
   showScreen('screen-category');
