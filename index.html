@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-11T13:14:23">
+<meta name="build-time" content="2026-04-11T13:31:11">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -2224,8 +2224,9 @@ let state = {
   thugIndex: null,
   thugIndices: [], // supports multiple thugs
   lastThugIndex: null,
-  lastThugIndices: [], // ALL thugs from last round — none will start next queue
-  thugQueue: [],
+  lastThugIndices: [],
+  thugHistory: {},
+  thugHistory: {},
   currentRevealIndex: 0,
   firstPlayerIndex: 0,
   firstNonThugSeen: false,
@@ -2241,10 +2242,12 @@ let state = {
 };
 
 // ── THUG SELECTION — FAIR SHUFFLE ROTATION ──
-// Everyone gets a turn before anyone repeats.
-// thugQueue is shuffled; we pop() from the END each round.
-// lastThugIndices stores ALL thugs from the previous round so none of them
-// appear at the END (i.e. are picked first) in the new shuffle.
+// ── THUG SELECTION — WEIGHTED RANDOM ──
+// Rules:
+//   - Previous round's ठग(s) → 0% chance (excluded completely)
+//   - Players who haven't been ठग yet this session → 3x weight
+//   - Players who have been ठग at least once → 1x weight
+// This keeps it unpredictable while naturally giving everyone a chance.
 function shuffleArray(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -2256,46 +2259,27 @@ function shuffleArray(arr) {
 
 function pickThug(alreadyPicked = new Set()) {
   const n = state.players.length;
+  const lastThugs = new Set(state.lastThugIndices || []);
+  const thugHistory = state.thugHistory || {}; // { playerIndex: timesBeenThug }
 
-  // Rebuild queue when empty
-  if (!state.thugQueue || state.thugQueue.length === 0) {
-    let newQueue = shuffleArray(Array.from({length: n}, (_, i) => i));
-    const lastThugs = new Set(state.lastThugIndices || []);
-
-    // Since we pop() from the END, the last element is picked FIRST next round.
-    // Make sure none of the previous round's thugs sit at the END of the new queue.
-    // Find the rightmost element that IS a last thug and swap it away from the end.
-    for (let attempts = 0; attempts < n; attempts++) {
-      const last = newQueue[newQueue.length - 1];
-      if (lastThugs.has(last) && newQueue.length > lastThugs.size) {
-        // Swap with a random non-last-thug position
-        const candidates = newQueue
-          .map((v, i) => ({ v, i }))
-          .filter(({ v, i }) => !lastThugs.has(v) && i !== newQueue.length - 1);
-        if (candidates.length > 0) {
-          const pick = candidates[Math.floor(Math.random() * candidates.length)];
-          [newQueue[newQueue.length - 1], newQueue[pick.i]] = [newQueue[pick.i], newQueue[newQueue.length - 1]];
-        }
-        break;
-      } else {
-        break;
-      }
-    }
-    state.thugQueue = newQueue;
+  // Build weighted candidate pool — exclude last round's thugs and already-picked
+  const candidates = [];
+  for (let i = 0; i < n; i++) {
+    if (lastThugs.has(i)) continue;   // excluded — was ठग last round
+    if (alreadyPicked.has(i)) continue; // excluded — already picked this round (2-thug mode)
+    const timesBeen = thugHistory[i] || 0;
+    const weight = timesBeen === 0 ? 3 : 1; // 3x if never been ठग, 1x if already had a turn
+    for (let w = 0; w < weight; w++) candidates.push(i);
   }
 
-  // Pop from end, skipping anyone already picked this round (for 2-thug mode)
-  // Don't reset the queue — just find the rightmost valid candidate
-  for (let i = state.thugQueue.length - 1; i >= 0; i--) {
-    if (!alreadyPicked.has(state.thugQueue[i])) {
-      const idx = state.thugQueue[i];
-      state.thugQueue.splice(i, 1);
-      return idx;
+  // Fallback: if all excluded (e.g. tiny group), allow anyone except alreadyPicked
+  if (candidates.length === 0) {
+    for (let i = 0; i < n; i++) {
+      if (!alreadyPicked.has(i)) candidates.push(i);
     }
   }
 
-  // Fallback (shouldn't happen with valid player counts)
-  return state.thugQueue.pop();
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 function showScreen(id) {
@@ -2323,7 +2307,9 @@ function addPlayer() {
   }
 
   state.players.push(name);
-  state.thugQueue = []; // reset queue since player count changed
+  // Reset thug history when player list changes
+  state.thugHistory = {};
+  state.lastThugIndices = [];
   input.value = '';
   err.textContent = '';
   renderChips();
@@ -2341,7 +2327,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function removePlayer(idx) {
   state.players.splice(idx, 1);
-  state.thugQueue = []; // reset queue since player count changed
+  // Reset thug history when player list changes
+  state.thugHistory = {};
+  state.lastThugIndices = [];
   renderChips();
   updateStartBtn();
 }
@@ -2653,6 +2641,10 @@ function pickRandomCategory() {
   state.thugIndex = state.thugIndices[0];
   state.lastThugIndex = state.thugIndices[0];
   state.lastThugIndices = [...state.thugIndices];
+  state.thugHistory = state.thugHistory || {};
+  state.thugIndices.forEach(i => {
+    state.thugHistory[i] = (state.thugHistory[i] || 0) + 1;
+  });
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
   state.round = 1;
@@ -2694,7 +2686,7 @@ function backToSetup() {
   state.selectedCategory = null;
   state.selectedWord = null;
   state.thugIndex = null;
-  // intentionally keep thugQueue and lastThugIndices so rotation persists across Back to Add Players
+  // keep thugHistory and lastThugIndices so weighted rotation persists across Back to Add Players
   state.numThugs = 1;
   state.resolvedNumThugs = 1;
   state.currentRevealIndex = 0;
@@ -2739,13 +2731,18 @@ function confirmCategory() {
   state.thugIndices = [];
   const picked = new Set();
   for (let t = 0; t < numThugs; t++) {
-    const idx = pickThug(picked); // pass already-picked set — no queue reset needed
+    const idx = pickThug(picked);
     picked.add(idx);
     state.thugIndices.push(idx);
   }
   state.thugIndex = state.thugIndices[0];
   state.lastThugIndex = state.thugIndices[0];
-  state.lastThugIndices = [...state.thugIndices]; // store ALL thugs for next round's exclusion
+  state.lastThugIndices = [...state.thugIndices];
+  // Record in history so weights update next round
+  state.thugHistory = state.thugHistory || {};
+  state.thugIndices.forEach(i => {
+    state.thugHistory[i] = (state.thugHistory[i] || 0) + 1;
+  });
 
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
@@ -3132,7 +3129,7 @@ function backToHome() {
   state.thugIndices = [];
   state.lastThugIndex = null;
   state.lastThugIndices = [];
-  state.thugQueue = [];
+  state.thugHistory = {};
   state.numThugs = 1;
   state.resolvedNumThugs = 1;
   state.currentRevealIndex = 0;
