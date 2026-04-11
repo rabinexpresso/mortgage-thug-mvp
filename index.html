@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-11T12:56:11">
+<meta name="build-time" content="2026-04-11T13:14:23">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -1133,7 +1133,7 @@
   <div style="height:24px"></div>
   <button class="btn btn-primary" onclick="playAgain()">🔄 Play Again (same players)</button>
   <div style="height:12px"></div>
-  <button class="btn btn-outline" onclick="showScreen('screen-home')">🏠 Back to Home</button>
+  <button class="btn btn-outline" onclick="backToHome()">🏠 Back to Home</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -2694,9 +2694,7 @@ function backToSetup() {
   state.selectedCategory = null;
   state.selectedWord = null;
   state.thugIndex = null;
-  state.lastThugIndex = null;
-  state.lastThugIndices = [];
-  state.thugQueue = [];
+  // intentionally keep thugQueue and lastThugIndices so rotation persists across Back to Add Players
   state.numThugs = 1;
   state.resolvedNumThugs = 1;
   state.currentRevealIndex = 0;
@@ -3123,6 +3121,32 @@ function playAgain() {
   showScreen('screen-category');
 }
 
+// ── BACK TO HOME — full reset ──
+function backToHome() {
+  // Full reset including thug queue — fresh start
+  state.players = [];
+  state.selectedCategories = [];
+  state.selectedCategory = null;
+  state.selectedWord = null;
+  state.thugIndex = null;
+  state.thugIndices = [];
+  state.lastThugIndex = null;
+  state.lastThugIndices = [];
+  state.thugQueue = [];
+  state.numThugs = 1;
+  state.resolvedNumThugs = 1;
+  state.currentRevealIndex = 0;
+  state.firstPlayerIndex = 0;
+  state.firstNonThugSeen = false;
+  state.usedWords = [];
+  state.round = 1;
+  state.voteTarget = null;
+  state.voteTargets = [];
+  state.caughtThugIdx = null;
+  state.caughtThugIndices = [];
+  showScreen('screen-home');
+}
+
 // ── SCREEN OVERRIDE: vote btn in game screen ──
 // (we override it when showVoteScreen is defined above)
 document.addEventListener('DOMContentLoaded', () => {
@@ -3219,7 +3243,7 @@ window.addEventListener('appinstalled', () => {
 // Uses GitHub Git Refs API — tiny response, never cached, works on all browsers
 // including Safari iOS. No authentication needed for public repos.
 (function() {
-  const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  const POLL_INTERVAL = 20 * 1000; // 20 seconds — game sessions are short
   let bannerShown = false;
   let baselineSha = null;
 
@@ -3292,7 +3316,7 @@ window.addEventListener('appinstalled', () => {
     setTimeout(() => {
       checkForUpdate();
       setInterval(checkForUpdate, POLL_INTERVAL);
-    }, 10000);
+    }, 5000);
   });
 })();
 </script>
