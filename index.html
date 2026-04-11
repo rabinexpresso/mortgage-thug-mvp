@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-11T13:31:11">
+<meta name="build-time" content="2026-04-11T13:50:35">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -548,25 +548,25 @@
   .cat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
     max-width: 420px;
   }
   .cat-tile {
     background: #fff;
-    border: 2.5px solid var(--primary-light);
+    border: 2px solid var(--primary-light);
     border-radius: var(--radius-sm);
-    padding: 14px 10px;
+    padding: 8px 6px;
     text-align: center;
     cursor: pointer;
     transition: all 0.18s;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--subtext);
-    line-height: 1.4;
+    line-height: 1.3;
   }
   .cat-tile:hover, .cat-tile.selected { background: #ede0ff; border-color: var(--primary); color: var(--primary); }
-  .cat-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .cat-icon { font-size: 18px; display: block; margin-bottom: 2px; }
 
   /* ── ROUND BADGE ── */
   .round-badge {
@@ -922,18 +922,18 @@
 <!-- ═══════════════════════════════════════════ -->
 <div id="screen-category" class="screen">
   <button class="back-btn" onclick="showScreen('screen-setup')">←</button>
-  <div style="height:56px"></div>
+  <div style="height:48px"></div>
   <p class="section-title text-center">Choose a Category</p>
   <p class="section-sub text-center" id="cat-screen-sub">Pick one or more topics — word is drawn from the combined pool</p>
-  <div style="height:16px"></div>
+  <div style="height:10px"></div>
   <div class="cat-grid" id="cat-grid"></div>
-  <div style="height:24px"></div>
+  <div style="height:14px"></div>
   <button class="btn btn-primary" id="cat-confirm-btn" onclick="confirmCategory()" disabled>✅ Confirm Selection</button>
-  <div style="height:12px"></div>
+  <div style="height:8px"></div>
   <p class="faded text-center" id="cat-count-hint">select at least one category</p>
-  <div style="height:12px"></div>
+  <div style="height:8px"></div>
   <button class="btn btn-outline" onclick="pickRandomCategory()">🎲 Random Category</button>
-  <div style="height:12px"></div>
+  <div style="height:8px"></div>
   <button class="btn btn-outline" id="select-all-btn" onclick="toggleSelectAll()">☑️ Select All Categories</button>
 </div>
 
@@ -2211,6 +2211,117 @@ const CATEGORIES = [
       'Genital',
       'Rectum',
       'Womb'
+    ]
+  },
+
+  // ── CATEGORY 24: THINGS PEOPLE ARE AFRAID TO SAY ─────────────────────────
+  {
+    id: 'afraid-to-say',
+    name: 'Afraid to Say',
+    nepali: 'भन्न डर लाग्छ',
+    icon: '🤐',
+    words: [
+      'Insecure',
+      'Broke',
+      'Jealous',
+      'Lonely',
+      'Help',
+      'Scared',
+      'Failed',
+      'Lied',
+      'Regret',
+      'Tired',
+      'Unhappy',
+      'Lost',
+      'Confused',
+      'Weak',
+      'Wrong',
+      'Sorry',
+      'Toxic',
+      'Addicted',
+      'Struggling',
+      'Broken',
+      'Empty',
+      'Hate',
+      'Ashamed',
+      'Space',
+      'Stuck',
+      'Overwhelmed',
+      'Afraid',
+      'Ignored',
+      'Useless',
+      'Hurt'
+    ]
+  },
+
+  // ── CATEGORY 25: BREAKUP REASONS ─────────────────────────────────────────
+  {
+    id: 'breakup-reasons',
+    name: 'Breakup Reasons',
+    nepali: 'ब्रेकअपको कारण',
+    icon: '💔',
+    words: [
+      'Cheating',
+      'Lying',
+      'Distrust',
+      'Distance',
+      'Boredom',
+      'Fighting',
+      'Jealousy',
+      'Control',
+      'Goals',
+      'Attraction',
+      'Pressure',
+      'Stress',
+      'Career',
+      'Immaturity',
+      'Silence',
+      'Incompatibility',
+      'Abuse',
+      'Neglect',
+      'Ego',
+      'Disrespect',
+      'Intimacy',
+      'Commitment',
+      'Values',
+      'Time',
+      'Addiction',
+      'Anger',
+      'Overthinking',
+      'Unavailable',
+      'Effort',
+      'Priorities'
+    ]
+  },
+
+  // ── CATEGORY 26: CELEBRITIES ──────────────────────────────────────────────
+  {
+    id: 'celebrities',
+    name: 'Celebrities',
+    nepali: 'सेलिब्रिटीहरू',
+    icon: '⭐',
+    words: [
+      'Cristiano Ronaldo',
+      'Lionel Messi',
+      'Shah Rukh Khan',
+      'Salman Khan',
+      'Taylor Swift',
+      'Selena Gomez',
+      'Kylie Jenner',
+      'Kim Kardashian',
+      'Dwayne Johnson',
+      'Zendaya Coleman',
+      'Billie Eilish',
+      'Justin Bieber',
+      'Ariana Grande',
+      'Tom Cruise',
+      'Leonardo DiCaprio',
+      'Brad Pitt',
+      'Angelina Jolie',
+      'The Weeknd',
+      'Robert Downey Jr.',
+      'Chris Hemsworth',
+      'Margot Robbie'
     ]
   }
 ];
