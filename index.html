@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-12T06:30:00">
+<meta name="build-time" content="2026-04-12T10:46:17">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -1143,21 +1143,21 @@
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-title">📖 How to Play<br><span style="font-size:14px;font-weight:600;color:var(--subtext)">कसरी खेल्ने?</span></div>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text">Add all players in <b>clockwise order</b> — minimum 3 players. Drag ☰ to reorder. With <b>6+ players</b>, choose <b>1 or 2 ठगs</b> at the bottom of this page.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">Choose one or more of the <b>23 categories</b>. A secret word is randomly picked from the combined pool. Some categories (🔞) are <b>password protected</b>.</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text"><b>Pass the phone</b> to each player. Drag the pink card to reveal your role. The <b>धितो ठग</b> (Mortgage Thug) sees only their role — not the secret word. With 6+ players, there may be <b>2 ठगs</b> who don't know each other!</div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-text">The first player is randomly selected. Go <b>clockwise</b> around the circle — each player says <b>one vague word clue</b>. The ठग tries to figure out the secret word from the clues.</div></div>
-      <div class="step"><div class="step-num">5</div><div class="step-text"><b>Discuss & vote</b> for who you think is the धितो ठग. The player with the most votes is caught.</div></div>
-      <div class="step"><div class="step-num">6</div><div class="step-text">If caught, the ठग gets <b>one chance to guess</b> the secret word. Guess correctly = ठग still wins!</div></div>
-      <div class="step"><div class="step-num">7</div><div class="step-text">If the ठग is <b>NOT caught</b>, the ठग wins. If caught and wrong guess, the <b>team wins!</b></div></div>
-      <div class="step"><div class="step-num">8</div><div class="step-text">The <b>first non-ठग player</b> to reveal their role can tap <b>🔄 Reset Word</b> to pick a different secret word before passing the phone.</div></div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Add all players in <b>clockwise order</b> — minimum 3 players. Drag ☰ to reorder. With <b>6+ players</b>, choose <b>1 ठग, 2 ठगs, or 🎲 Random</b> at the bottom of the setup page.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Choose one or more of the <b>38 categories</b> — the secret word is drawn from the combined pool. Tap <b>🎲 Random Category</b> to let the app secretly pick one. Some categories (🔞) are <b>password protected</b>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><b>Pass the phone</b> to each player. Drag the pink card to reveal your role. The <b>धितो ठग</b> sees their role and the category (if not random) — but NOT the secret word. With 6+ players there may be <b>2 ठगs</b> who don't know each other!</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">The <b>first non-ठग player</b> can tap <b>🔄 Reset Word</b> to pick a different secret word before passing the phone.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text">A random player is chosen to go first. Go <b>clockwise</b> — each player gives <b>one vague word clue</b> about the secret word. The ठग blends in and tries to figure out the word from the clues.</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-text"><b>Discuss & vote</b> for who you think is the ठग. With 6+ players in 2-ठग or 🎲 random mode, you can select <b>up to 2 suspects</b>.</div></div>
+      <div class="step"><div class="step-num">7</div><div class="step-text">If caught, the ठग gets <b>one chance to guess</b> the secret word. Guess correctly = ठग still wins!</div></div>
+      <div class="step"><div class="step-num">8</div><div class="step-text">If the ठग is <b>NOT caught</b>, the ठग wins. If caught and wrong guess, the <b>team wins!</b></div></div>
     </div>
     <div style="height:16px"></div>
     <div style="background:#f0e8ff;border-radius:var(--radius-sm);padding:12px 16px;">
       <p style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px;">🏆 How to win</p>
       <p style="font-size:12px;font-weight:600;color:var(--subtext);line-height:1.5;">
         <b style="color:var(--primary)">ठग wins</b> by not getting caught OR by guessing the secret word after being caught.<br>
-        <b style="color:var(--primary)">Team wins</b> by correctly identifying and catching the ठग.
+        <b style="color:var(--primary)">Team wins</b> by correctly identifying and catching all ठगs.
       </p>
     </div>
     <div style="height:20px"></div>
@@ -2532,6 +2532,21 @@ const CATEGORIES = [
       'Proposal', 'Contract', 'Terms', 'Conditions', 'Risk', 'Trust',
       'Experience', 'Guarantee', 'Return', 'Later', 'Think', 'Decide',
       'Call', 'Meeting', 'Followup', 'Confirm'
+    ]
+  },
+
+  // ── CATEGORY 38: THINGS DIVORCEES SAY ────────────────────────────────────
+  {
+    id: 'divorcees-say',
+    name: 'Things Divorcees Say',
+    nepali: 'तलाकशुदा भन्छन्',
+    icon: '💔',
+    words: [
+      'Freedom', 'Peace', 'Alone', 'Single', 'Restart', 'Healing', 'Growth',
+      'Lessons', 'Mistakes', 'Regret', 'Relief', 'Stress', 'Toxic', 'Done',
+      'Over', 'Enough', 'Moveon', 'Forward', 'Therapy', 'Trust', 'Again',
+      'Dating', 'Cautious', 'Independent', 'Stronger', 'Better', 'Happier',
+      'Closure', 'Acceptance', 'Reality'
     ]
   }
 ];
