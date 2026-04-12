@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-12T06:05:14">
+<meta name="build-time" content="2026-04-12T06:30:00">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -2554,6 +2554,7 @@ let state = {
   usedWords: [], // track used words to prevent repeats
   numThugs: 1,  // 1, 2, or 'random' — chosen by host
   resolvedNumThugs: 1, // actual resolved count after random is decided
+  categoryWasRandom: false, // true when 🎲 Random Category was used
   voteTargets: [], // array to support up to 2 votes
   caughtThugIdx: null,
   caughtThugIndices: [],
@@ -2942,6 +2943,7 @@ function selectCategory(idx) {
 function pickRandomCategory() {
   const idx = Math.floor(Math.random() * CATEGORIES.length);
   state.selectedCategories = [idx];
+  state.categoryWasRandom = true; // category was randomly chosen — hide from ठग
   const combinedWords = CATEGORIES[idx].words;
   const available = combinedWords.filter(w => !state.usedWords.includes(w));
   const pool = available.length > 0 ? available : combinedWords;
@@ -3060,6 +3062,7 @@ function goToCategory() {
 
 function confirmCategory() {
   if (state.selectedCategories.length === 0) return;
+  state.categoryWasRandom = false; // host manually selected category — show to ठग
   const combinedWords = state.selectedCategories.flatMap(idx => CATEGORIES[idx].words);
 
   // Prevent same word repeat — exclude recently used words
@@ -3120,11 +3123,16 @@ function showRevealFor(idx) {
   // Set back content
   const back = document.getElementById('reveal-back');
   if (isThug) {
+    const showCat = !state.categoryWasRandom;
     back.innerHTML = `
       <div style="text-align:center;padding:20px">
         <div style="font-size:52px;margin-bottom:12px">🕵️</div>
         <div style="font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--primary)">धितो ठग</div>
         <div style="font-size:20px;font-weight:800;color:var(--dark);margin-top:4px">MORTGAGE THUG</div>
+        ${showCat ? `
+        <div style="margin-top:10px">
+          <span style="font-size:11px;color:var(--subtext);background:#f0e8ff;border-radius:50px;padding:4px 12px;font-weight:600">${escHtml(cat.name)}</span>
+        </div>` : ''}
         <div style="font-size:12px;color:var(--subtext);margin-top:12px;font-weight:600">Blend in. Listen for clues.<br>Figure out the secret word.</div>
       </div>
     `;
@@ -3209,11 +3217,17 @@ function nextPlayer() {
 }
 
 // ── DRAG TO REVEAL ──
+// Cloning the cover element removes ALL stacked listeners from previous rounds.
 function initDrag() {
-  const cover = document.getElementById('reveal-cover');
+  const oldCover = document.getElementById('reveal-cover');
+  if (!oldCover) return;
+
+  // Clone replaces old element — wipes all previously attached event listeners
+  const cover = oldCover.cloneNode(true);
+  oldCover.parentNode.replaceChild(cover, oldCover);
+
   const outer = document.getElementById('reveal-outer');
-  let startX, startY, startLeft, startTop, dragging = false;
-  let removed = false;
+  let startX, startY, startLeft, startTop, dragging = false, removed = false;
 
   function onStart(x, y) {
     if (removed) return;
@@ -3230,12 +3244,8 @@ function initDrag() {
     if (!dragging || removed) return;
     const dx = x - startX;
     const dy = y - startY;
-    const newLeft = startLeft + dx;
-    const newTop = startTop + dy;
-    cover.style.left = newLeft + 'px';
-    cover.style.top = newTop + 'px';
-
-    // If moved far enough, dismiss
+    cover.style.left = (startLeft + dx) + 'px';
+    cover.style.top = (startTop + dy) + 'px';
     const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist > 120) {
       removed = true;
@@ -3244,29 +3254,38 @@ function initDrag() {
       cover.style.transform = `translate(${dx*2}px, ${dy*2}px) rotate(20deg)`;
       cover.style.opacity = '0';
       cover.style.pointerEvents = 'none';
-      // Enable the Next Player button now that role has been revealed
       document.getElementById('next-player-btn').disabled = false;
     }
   }
 
   function onEnd() { dragging = false; }
 
-  // Touch
+  // Attach to the fresh cloned cover
   cover.addEventListener('touchstart', e => {
-    const t = e.touches[0];
-    onStart(t.clientX, t.clientY);
+    onStart(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
   cover.addEventListener('touchmove', e => {
-    const t = e.touches[0];
-    onMove(t.clientX, t.clientY);
+    onMove(e.touches[0].clientX, e.touches[0].clientY);
     e.preventDefault();
   }, { passive: false });
   cover.addEventListener('touchend', onEnd);
-
-  // Mouse
   cover.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
-  document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
-  document.addEventListener('mouseup', onEnd);
+
+  // mousemove/mouseup on document — use named functions so we can remove them
+  function onMouseMove(e) { onMove(e.clientX, e.clientY); }
+  function onMouseUp() { onEnd(); }
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+
+  // Clean up document listeners when cover is fully dismissed
+  const observer = new MutationObserver(() => {
+    if (cover.style.pointerEvents === 'none') {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      observer.disconnect();
+    }
+  });
+  observer.observe(cover, { attributes: true, attributeFilter: ['style'] });
 }
 
 // ── WHO GOES FIRST SCREEN ──
@@ -3469,8 +3488,7 @@ function playAgain() {
 
 // ── BACK TO HOME — full reset ──
 function backToHome() {
-  // Full reset including thug queue — fresh start
-  state.players = [];
+  // Reset game state but KEEP players — same as Play Again
   state.selectedCategories = [];
   state.selectedCategory = null;
   state.selectedWord = null;
@@ -3490,6 +3508,22 @@ function backToHome() {
   state.voteTargets = [];
   state.caughtThugIdx = null;
   state.caughtThugIndices = [];
+
+  // Re-render player chips so UI matches state (players still there)
+  renderChips();
+
+  // Update start button and hint based on current player count
+  updateStartBtn();
+  const hint = document.getElementById('player-count-hint');
+  const n = state.players.length;
+  if (hint) hint.textContent = n < 3
+    ? `${n} added — need ${3 - n} more`
+    : `${n} players ready ✓ — drag ☰ to reorder`;
+
+  // Show/hide thug count toggle based on player count
+  const thugWrap = document.getElementById('thug-count-wrap');
+  if (thugWrap) thugWrap.style.display = n >= 6 ? 'block' : 'none';
+
   showScreen('screen-home');
 }
 
