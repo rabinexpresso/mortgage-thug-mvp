@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="build-time" content="2026-04-12T10:46:17">
+<meta name="build-time" content="2026-04-13T04:18:33">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="धितो ठग">
 <meta name="theme-color" content="#6b3fa0">
@@ -2985,6 +2985,7 @@ function pickRandomCategory() {
   });
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
+  state.firstPlayerIndex = Math.floor(Math.random() * state.players.length);
   state.round = 1;
   state.voteTarget = null;
 
@@ -3113,6 +3114,7 @@ function confirmCategory() {
 
   state.currentRevealIndex = 0;
   state.firstNonThugSeen = false;
+  state.firstPlayerIndex = Math.floor(Math.random() * state.players.length);
   state.round = 1;
   state.voteTarget = null;
 
